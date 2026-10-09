@@ -1,0 +1,3667 @@
+/* ============================================
+   OAKLENS OS — SHARED STYLES
+   main.css · Every page imports this
+   ============================================
+
+   Design system: five presets × two modes, all through L2 semantic tokens
+   (design-spec: docs/starter-template/design-spec.md — palette source of
+   truth). The preset is stamped on <html> by the worker from site.config.js.
+   - aperture       contemporary studio (cobalt) — starter default
+   - passe-partout  fine-art gallery (oxblood on warm paper)
+   - noir           the original tech-noir DNA (#000 / #E0E0E0 / #FF0000)
+   - selenium       the folio — cool selenium gray, serif, coral accent
+   - cyanotype      the folio in Prussian-blue ink on cool paper
+   New styles use semantic tokens (--bg, --fg, --accent, …) — never raw hex;
+   legacy names (--black, --red, --gray-*) resolve via the compat shim below.
+
+   ============================================ */
+
+/* ---- SELF-HOSTED FONTS ----
+   Latin subset, served from /fonts/ on our own origin — replaces the
+   render-blocking Google Fonts request (no third-party DNS/TLS in the critical
+   path). Syne is a variable font: one file covers weights 400–800.
+   font-display: swap keeps text visible during load. */
+@font-face {
+  font-family: 'Syne';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('/fonts/syne-latin-var.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Syne Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/syne-mono-latin.woff2') format('woff2');
+}
+/* Preset faces (starter template). All declared unconditionally — a browser
+   only downloads faces the active preset's font-family stacks actually use. */
+@font-face {
+  font-family: 'Archivo';
+  font-style: normal;
+  font-weight: 500 700;
+  font-display: swap;
+  src: url('/fonts/archivo-latin-var.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Sora';
+  font-style: normal;
+  font-weight: 300 600;
+  font-display: swap;
+  src: url('/fonts/sora-latin-var.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/ibm-plex-mono-latin-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/ibm-plex-mono-latin-500.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('/fonts/fraunces-latin-var.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Hanken Grotesk';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('/fonts/hanken-grotesk-latin-var.woff2') format('woff2');
+}
+
+/* ---- RESET ---- */
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ---- L2 SEMANTIC TOKENS ----
+   The preset owns the values; components reference only these names. The
+   worker stamps data-preset + data-theme-default on <html> per request
+   (injectSiteChrome), so first paint is already in the configured preset.
+   Default preset: aperture. Mode: Midnight default, Daylight via
+   :root[data-theme="light"] — the same attribute convention the Field
+   Console already uses. Palette values are design-spec §3 literals — do not
+   re-derive them. --accent-rgb carries the accent's raw channels so
+   alpha-composited effects (glows, washes at odd opacities) re-theme with
+   the preset instead of staying hardwired red. */
+:root {
+  /* aperture · Midnight */
+  --bg: #0C0E13;
+  --bg-rgb: 12, 14, 19;
+  --surface: #141821;
+  --surface-2: #1B2233;
+  --line: #242B37;
+  --line-2: #2F3A4C;
+  --fg: #E7EBF2;
+  --fg-strong: #F4F7FC;
+  --muted: #838C9C;
+  --faint: #5A6272;
+  --accent: #5680FF;
+  --accent-rgb: 86, 128, 255;
+  --accent-text: #8FA8FF;
+  --on-accent: #080D1C;
+  --accent-wash: rgba(86, 128, 255, 0.10);
+  --font-display: 'Archivo', system-ui, sans-serif;
+  --font-body: 'Sora', system-ui, sans-serif;
+  --font-meta: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+  --r-chip: 7px;
+  --nav-h: 52px;
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  /* aperture · Daylight */
+  --bg: #EBEEF3;
+  --bg-rgb: 235, 238, 243;
+  --surface: #FFFFFF;
+  --surface-2: #F3F5F9;
+  --line: #DBE1EA;
+  --line-2: #C6CEDC;
+  --fg: #0D1017;
+  --fg-strong: #06080C;
+  --muted: #58616F;
+  --faint: #7A8290;
+  --accent: #1E3FDB;
+  --accent-rgb: 30, 63, 219;
+  --accent-text: #1E3FDB;
+  --on-accent: #FFFFFF;
+  --accent-wash: rgba(30, 63, 219, 0.08);
+  color-scheme: light;
+}
+
+:root[data-preset="passe-partout"] {
+  /* passe-partout · Midnight — the matted print on a gallery wall */
+  --bg: #17130F;
+  --bg-rgb: 23, 19, 15;
+  --surface: #201A14;
+  --surface-2: #2A221A;
+  --line: #332B20;
+  --line-2: #453A2C;
+  --fg: #EEE7DA;
+  --fg-strong: #FBF6EA;
+  --muted: #A99B85;
+  --faint: #7E735F;
+  --accent: #C4604F;
+  --accent-rgb: 196, 96, 79;
+  --accent-text: #E08A75;
+  --on-accent: #17130F;
+  --accent-wash: rgba(196, 96, 79, 0.12);
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'Hanken Grotesk', system-ui, sans-serif;
+  --font-meta: 'Hanken Grotesk', system-ui, sans-serif;
+  --r-chip: 3px;
+}
+:root[data-preset="passe-partout"][data-theme="light"] {
+  /* passe-partout · Daylight */
+  --bg: #EFE9DE;
+  --bg-rgb: 239, 233, 222;
+  --surface: #F8F4EC;
+  --surface-2: #FFFDF8;
+  --line: #E0D7C7;
+  --line-2: #CBBFA9;
+  --fg: #211C15;
+  --fg-strong: #14100B;
+  --muted: #6F6455;
+  --faint: #8D8271;
+  --accent: #963A30;
+  --accent-rgb: 150, 58, 48;
+  --accent-text: #963A30;
+  --on-accent: #FFFFFF;
+  --accent-wash: rgba(150, 58, 48, 0.08);
+}
+
+:root[data-preset="noir"] {
+  /* noir · Midnight — the legacy DNA, exactly today's literals */
+  --bg: #000000;
+  --bg-rgb: 0, 0, 0;
+  --surface: #0A0A0A;
+  --surface-2: #1A1A1A;
+  --line: #1A1A1A;
+  --line-2: #333333;
+  --fg: #E0E0E0;
+  --fg-strong: #F0F0F0;
+  --muted: #919191;
+  --faint: #555555;
+  --accent: #FF0000;
+  --accent-rgb: 255, 0, 0;
+  --accent-text: #FF4646;
+  --on-accent: #000000;
+  --accent-wash: rgba(255, 0, 0, 0.12);
+  --font-display: 'Syne', sans-serif;
+  --font-body: 'Syne Mono', monospace;
+  --font-meta: 'Syne Mono', monospace;
+  --r-chip: 2px;
+}
+:root[data-preset="noir"][data-theme="light"] {
+  /* noir · Daylight — the console's proven DAYLIGHT palette (paper + ink +
+     red stamp), lifted as-is */
+  --bg: #F4F1EA;
+  --bg-rgb: 244, 241, 234;
+  --surface: #FBF9F4;
+  --surface-2: #FFFFFF;
+  --line: #E3DED2;
+  --line-2: #D3CEC2;
+  --fg: #3D3A34;
+  --fg-strong: #131210;
+  --muted: #6B675F;
+  --faint: #8B867C;
+  --accent: #C41111;
+  --accent-rgb: 196, 17, 17;
+  --accent-text: #C41111;
+  --on-accent: #FFFFFF;
+  --accent-wash: rgba(196, 17, 17, 0.07);
+}
+
+:root[data-preset="selenium"] {
+  /* selenium · Midnight — the folio. Named for the toner that gives print
+     blacks their cool cast: a neutral-cool ground, serif display at modest
+     weight, and the coral accent carried over from the OS marketing surface.
+     Squarer geometry than passe-partout — hairlines, not cards. */
+  --bg: #101318;
+  --bg-rgb: 16, 19, 24;
+  --surface: #171B21;
+  --surface-2: #1C212A;
+  --line: #262B33;
+  --line-2: #333A44;
+  --fg: #DCD8D0;
+  --fg-strong: #EFECE6;
+  --muted: #8F8D88;
+  --faint: #6A6863;
+  --accent: #D8674A;
+  --accent-rgb: 216, 103, 74;
+  --accent-text: #E08063;
+  --on-accent: #101318;
+  --accent-wash: rgba(216, 103, 74, 0.10);
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'Hanken Grotesk', system-ui, sans-serif;
+  --font-meta: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+  --r-chip: 2px;
+}
+:root[data-preset="selenium"][data-theme="light"] {
+  /* selenium · Daylight — warm-neutral paper, the accent deepened for
+     small-text contrast on light ground */
+  --bg: #F4F2EE;
+  --bg-rgb: 244, 242, 238;
+  --surface: #FBF9F6;
+  --surface-2: #FFFFFF;
+  --line: #D6D2CA;
+  --line-2: #C4BFB4;
+  --fg: #2B2E33;
+  --fg-strong: #14171B;
+  --muted: #6D7178;
+  --faint: #8E9198;
+  --accent: #B8482C;
+  --accent-rgb: 184, 72, 44;
+  --accent-text: #B8482C;
+  --on-accent: #FFFFFF;
+  --accent-wash: rgba(184, 72, 44, 0.07);
+}
+
+:root[data-preset="cyanotype"] {
+  /* cyanotype · Midnight — the folio in another darkroom. Named for the
+     Prussian-blue contact print: an inky blue-black ground with a steel-blue
+     accent lifted for dark-ground legibility. Same faces and geometry as
+     selenium — a palette sibling, not a new layout. */
+  --bg: #0D1620;
+  --bg-rgb: 13, 22, 32;
+  --surface: #14202C;
+  --surface-2: #1A2A3A;
+  --line: #22364A;
+  --line-2: #2E4762;
+  --fg: #D7E0E7;
+  --fg-strong: #EDF4F8;
+  --muted: #8299A9;
+  --faint: #5B7080;
+  --accent: #5C9FCE;
+  --accent-rgb: 92, 159, 206;
+  --accent-text: #85BADF;
+  --on-accent: #0D1620;
+  --accent-wash: rgba(92, 159, 206, 0.10);
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'Hanken Grotesk', system-ui, sans-serif;
+  --font-meta: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+  --r-chip: 2px;
+}
+:root[data-preset="cyanotype"][data-theme="light"] {
+  /* cyanotype · Daylight — the print itself: Prussian ink on cool paper */
+  --bg: #F1F4F5;
+  --bg-rgb: 241, 244, 245;
+  --surface: #F9FBFB;
+  --surface-2: #FFFFFF;
+  --line: #D5DDE1;
+  --line-2: #BFCBD2;
+  --fg: #24323C;
+  --fg-strong: #0F1B24;
+  --muted: #5D7280;
+  --faint: #839299;
+  --accent: #23648E;
+  --accent-rgb: 35, 100, 142;
+  --accent-text: #23648E;
+  --on-accent: #FFFFFF;
+  --accent-wash: rgba(35, 100, 142, 0.08);
+}
+
+/* ---- COMPAT SHIM ----
+   Legacy names re-resolve against the active preset/mode because the
+   referenced properties change on the same (root) element — the exact trick
+   field-console.css already uses. Page-local <style> blocks keep working
+   untouched. --red-dim/--red-glow keep their original alphas via
+   --accent-rgb (not --accent-wash) so noir/Midnight stays pixel-identical
+   to the pre-template site while the other presets still re-theme. */
+:root {
+  --black: var(--bg);
+  --white: var(--fg);
+  --white-bright: var(--fg-strong);
+  --red: var(--accent);
+  --red-dim: rgba(var(--accent-rgb), 0.2);
+  --red-glow: rgba(var(--accent-rgb), 0.35);
+  --gray-300: var(--muted);
+  --gray-500: var(--faint);
+  --gray-700: var(--line-2);
+  --gray-800: var(--line);
+  --gray-900: var(--surface);
+  --font-mono: var(--font-meta);
+}
+
+/* ---- BASE ---- */
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+/* Prevent pinch-to-zoom on mobile */
+html {
+  touch-action: pan-x pan-y;
+  /* Android Chrome paints a grey tap flash on anything with a click handler
+     (frames, burst cells, day headers). Hover/lit states are the feedback
+     here — suppress the overlay everywhere, like field-console.css does. */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ============================================
+   NAVIGATION
+   Shared across all pages
+   ============================================ */
+
+.nav {
+  position: sticky;
+  top: 0;
+  height: var(--nav-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  border-bottom: 1px solid var(--gray-800);
+  background: rgba(var(--bg-rgb), 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  z-index: 100;
+}
+
+/* Homepage overrides sticky → part of flex column */
+.page--home .nav {
+  position: relative;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background: var(--black);
+}
+
+.nav-logo {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.82rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.nav-logo .dot-art {
+  color: var(--red);
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.nav-link {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 1.2px;
+  color: var(--gray-300);
+  padding: 6px 14px;
+  transition: color 0.2s ease;
+}
+
+.nav-link:hover {
+  color: var(--white-bright);
+}
+
+.nav-link.active {
+  color: var(--red);
+}
+
+.nav-link.terminal {
+  color: var(--gray-500);
+}
+
+.nav-link.terminal:hover {
+  color: var(--red);
+}
+
+/* A nav item dressed as THE action — for the one link an owner wants read as
+   a button rather than a menu entry. Opt-in per item via `class: 'cta'` in
+   site.config.js → nav[] (the demo's "Install It Yourself" is the worked
+   example: the nav is sticky, so the action rides along the whole visit).
+   Token-driven, so it wears every preset correctly. */
+.nav-link.cta {
+  border: 1px solid var(--accent);
+  border-radius: var(--r-chip);
+  color: var(--accent-text);
+  padding: 0.35em 0.85em;
+}
+
+.nav-link.cta:hover,
+.nav-link.cta.active {
+  background: var(--accent-wash);
+  color: var(--accent-text);
+}
+
+.nav-mail {
+  font-size: 0.82rem;
+  color: var(--gray-500);
+  padding: 6px 10px;
+  transition: color 0.2s ease;
+}
+
+.nav-mail:hover {
+  color: var(--white);
+}
+
+/* ---- MODE TOGGLE (Midnight/Daylight) ----
+   Rendered into the nav by the worker only when theme.toggle is enabled;
+   behavior in js/mode-toggle.js. Sized to a ≥40px hit area even though the
+   glyph is small. */
+.mode-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.95rem;
+  line-height: 1;
+  color: var(--faint);
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.mode-toggle:hover {
+  color: var(--fg);
+  transform: rotate(180deg);
+}
+
+.mode-toggle:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 2px;
+  color: var(--fg);
+}
+
+/* Mobile menu: match the nav-link rows, not the icon button */
+.nav-mobile .mode-toggle {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font-family: var(--font-meta);
+  font-size: 0.78rem;
+  letter-spacing: 1.5px;
+  padding: 12px 24px;
+  min-height: 44px;
+}
+
+/* ---- HAMBURGER (mobile) ---- */
+
+.nav-hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 28px;
+  height: 28px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.nav-hamburger span {
+  display: block;
+  width: 100%;
+  height: 1.5px;
+  background: var(--gray-300);
+  transition: all 0.3s ease;
+}
+
+.nav-hamburger.is-open span:nth-child(1) {
+  transform: translateY(6.5px) rotate(45deg);
+}
+
+.nav-hamburger.is-open span:nth-child(2) {
+  opacity: 0;
+}
+
+.nav-hamburger.is-open span:nth-child(3) {
+  transform: translateY(-6.5px) rotate(-45deg);
+}
+
+/* ============================================
+   SCROLL PROGRESS — blog posts + /dev
+   ============================================ */
+
+.scroll-progress {
+  position: fixed;
+  top: var(--nav-h);
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--gray-800);
+  z-index: 99;
+  pointer-events: none;
+}
+
+.scroll-progress-bar {
+  width: 100%;
+  height: 100%;
+  background: var(--red);
+  transform-origin: left;
+  transform: scaleX(0);
+  animation: scroll-fill linear;
+  animation-timeline: scroll(root);
+}
+
+@keyframes scroll-fill {
+  to { transform: scaleX(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-progress {
+    display: none;
+  }
+}
+
+/* ---- MOBILE NAV PANEL ---- */
+
+.nav-mobile {
+  display: none;
+  position: fixed;
+  top: var(--nav-h);
+  left: 0;
+  right: 0;
+  background: rgba(var(--bg-rgb), 0.96);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--gray-800);
+  padding: 16px 0;
+  z-index: 99;
+  transform: translateY(-100%);
+  opacity: 0;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.25s ease;
+}
+
+.nav-mobile.is-open {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.nav-mobile a {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 1.5px;
+  color: var(--gray-300);
+  padding: 12px 24px;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.nav-mobile a:hover {
+  color: var(--white-bright);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.nav-mobile a.active {
+  color: var(--red);
+}
+
+/* ============================================
+   RECENT WORK — homepage 3-up grid
+   Archive frames render as photo cards, Field Notes as typographic text cards.
+   4:5 tiles, 9px radius — proportions match docs/starter-template/preview.html.
+   Filled at runtime by js/recent-index.js; themes across presets via tokens.
+   ============================================ */
+
+.cl-work {
+  flex-shrink: 0;
+  padding: 18px 0 26px;
+  border-top: 1px solid var(--line);
+}
+
+/* Clear the fixed footer so the last card isn't clipped behind it. This was a
+   mobile-only rule back when the homepage footer was the only one in flow;
+   now the bar is fixed at every width and the clearance has to be too. */
+.page--home .cl-work {
+  padding-bottom: 52px;
+}
+
+.cl-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 26px 12px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 14px;
+}
+
+.cl-work .cl-eyebrow {
+  font-family: var(--font-meta);
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.cl-more {
+  font-family: var(--font-meta);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-text);
+}
+
+.cl-workgrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  padding: 0 26px;
+}
+
+/* Hide 4th card on desktop to maintain a perfect 3-up row */
+.cl-workgrid .wk-card:nth-child(n+4) {
+  display: none;
+}
+
+/* ---- shared card shell ---- */
+.wk-card {
+  display: flex;
+  flex-direction: column;
+  border-radius: 9px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  cursor: pointer;
+  transition: border-color 0.15s;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  /* A CARD'S INTERNAL LAYERING MUST NOT ESCAPE THE CARD.
+     Several card types stack things inside themselves: the pulse card lifts its
+     content above its own painted gradients (`.wk-pulse > *`, z-index 1), and
+     the audio card lifts the player and share button above the stretched title
+     link (`.wk-audio .ap`, z-index 2) so the transport stays pressable.
+
+     Those numbers are only ever meant to be read against the CARD. But
+     `overflow: hidden` does not create a stacking context, so without this they
+     resolved against the ROOT one — and on mobile, where the homepage footer is
+     `position: fixed`, the waveform and the pulse text painted straight over
+     it as you scrolled past.
+
+     `isolation: isolate` makes the card its own stacking context, so an inner
+     z-index is scoped to its card by construction. This is the fix for the
+     class, not the two symptoms: a card type added later cannot reintroduce it.
+     Safe because nothing inside a card is `position: fixed` and no card opens a
+     popover that needs to escape its bounds. */
+  isolation: isolate;
+}
+
+/* Hover border only on pointer devices — touch fires :hover on tap and
+   the sticky state interferes with smooth scrolling on mobile. */
+@media (hover: hover) {
+  .wk-card:hover {
+    border-color: var(--accent);
+  }
+}
+
+/* ---- photo card (archive frame) ---- */
+.wk-img {
+  position: relative;
+  aspect-ratio: 4/5;
+  display: block;
+  background-size: cover;
+  background-position: center;
+}
+
+/* On-media tag: theme-independent, like the folio-hero copy — it sits over
+   the photograph, whose scrim is dark in every preset/mode. */
+.wk-tag {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-family: var(--font-meta);
+  font-size: 0.5rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(0, 0, 0, 0.34);
+  padding: 3px 7px;
+  border-radius: 5px;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+.wk-body {
+  padding: 12px 13px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  /* Fill the card. In the equal-height grid row a card is stretched to match its
+     tallest sibling; without this the body stops at its text and the slack shows
+     the card's own background below it — which on a palette-tinted composed card
+     reads as the footer gradient "not reaching the bottom edge." The title/meta
+     stay at the top (no margin-top:auto here, unlike the console), so the slack is
+     simply tinted footer, not a gap in the copy. */
+  flex: 1 1 auto;
+}
+
+.wk-title {
+  font-family: var(--font-display);
+  font-weight: 640;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  font-size: 0.8rem;
+  line-height: 1.15;
+  color: var(--fg-strong);
+}
+/* An archive title is curated and short; a COMPOSED card's is typed, so bound it
+   to the caption's two lines — otherwise a long one grows the footer and shoves
+   the picture around the row. Paired with a maxlength in the composer. */
+.wk-composed .wk-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.wk-meta {
+  font-family: var(--font-meta);
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---- text card (Field Note) — the writer-audience hook ---- */
+.wk-text {
+  padding: 16px 16px 14px;
+  background: var(--surface-2);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  overflow: hidden;
+  /* The tease is short by design, so centre the block — kicker, title,
+     pull-quote, meta — and the leftover space splits evenly top and bottom,
+     reading as a deliberate card rather than text stranded at the top. */
+  justify-content: center;
+}
+
+.wk-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-meta);
+  font-size: 0.56rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-text);
+}
+
+.wk-dot {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 auto;
+  border-radius: 1px;
+  background: var(--accent);
+  border: 1px solid var(--led-bezel, rgba(0, 0, 0, 0.9));
+  box-shadow:
+    inset 0 0 2px var(--led-spec, rgba(255, 255, 255, 0.55)),
+    0 0 6px rgba(var(--accent-rgb), 0.45);
+}
+
+.wk-t-title {
+  font-family: var(--font-display);
+  font-weight: 680;
+  font-size: 1.18rem;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  color: var(--fg-strong);
+}
+
+/* The excerpt is a glanceable tease, not a summary — the words are the design.
+   No line-clamp: it's pre-truncated at render on a sentence boundary, so it
+   ends on a finished thought and the caret is never clipped. Size steps DOWN
+   per tier below as the tease gets longer, so every card fills the tile at a
+   readable scale. This default is the `standard` (longest) tease. */
+.wk-snip {
+  font-family: var(--font-body);
+  font-size: 1.55rem;
+  line-height: 1.36;
+  letter-spacing: -0.005em;
+  color: var(--fg);
+}
+
+.wk-t-meta {
+  margin-top: 16px;
+  font-family: var(--font-meta);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--faint);
+  padding-top: 9px;
+  border-top: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+/* Drop cap — first grapheme wrapped in a <span> at render (never
+   ::first-letter, which breaks on a leading quote / number / emoji). A bold
+   graphic initial in the accent; opens feature + standard. */
+.wk-dropcap {
+  float: left;
+  font-family: var(--font-display);
+  font-weight: 720;
+  font-size: 3em;
+  line-height: 0.62;
+  margin: 6px 10px -2px 0;
+  color: var(--accent);
+}
+
+/* Adaptive tiers — type steps DOWN as the tease gets longer so every card fills
+   the tile at a readable scale. data-tier is stamped from the tease length by
+   js/recent-index.js. (.wk-snip default above is the standard/longest tease.)
+   A one-line tease becomes a bold display pull-quote (statement, no drop cap);
+   a short one a large one (feature); a two/three-line one the standard size. */
+.wk-text[data-tier="statement"] .wk-snip {
+  font-family: var(--font-display);
+  font-weight: 560;
+  font-size: clamp(2.2rem, 1.3rem + 3.1vw, 3.2rem);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  color: var(--fg-strong);
+}
+.wk-text[data-tier="feature"] .wk-snip {
+  font-size: 1.95rem;
+  line-height: 1.26;
+  letter-spacing: -0.01em;
+}
+.wk-text[data-tier="feature"] .wk-dropcap {
+  font-size: 3.3em;
+}
+
+/* Blinking editor caret — the note is "still being written." Text cards only. */
+.ed-caret {
+  display: inline-block;
+  width: 2px;
+  height: 1.02em;
+  margin-left: 3px;
+  vertical-align: -2px;
+  background: var(--accent);
+  border-radius: 1px;
+  animation: ed-blink 1.15s ease-in-out infinite;
+}
+@keyframes ed-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ed-caret { animation: none; opacity: 0.9; }
+}
+
+/* ---- field-note card · HERO layout (data-layout="hero") ----
+   The card engine's first real layout (docs/cards-console-vision.md §3). It is
+   opt-in per post, so the typographic tile above stays exactly as it was for
+   every note that doesn't ask for this.
+
+   Hero-FORWARD, not "newsy": the picture does the visual work and the note's
+   identity rides on the same on-media chip the archive and RAW cards wear,
+   rather than a headline stamped across the photograph. That is also the whole
+   scrim story — .wk-tag already carries its own (translucent plate + blur,
+   theme-independent because it sits on a photo, not on the page) and nothing
+   else on this card touches the image, so there is no per-preset legibility
+   tuning to get wrong.
+
+   Structurally the card becomes the photo tile: the text tile's padded,
+   centred, --surface-2 shell resets to .wk-card's own ground and .wk-img
+   supplies the 4:5 crop. Every value here is a theme token, so all five
+   presets and both modes come out right without a colour being named. */
+/* `overlay` is the same shell reset for the same reason — it is the hero card
+   with its words moved onto the picture (js/recent-index.js: both layouts are
+   drawn by textHeroCard), so the typographic tile's padded --surface-2 shell has
+   to get out of the way in both. */
+.wk-text[data-layout="hero"],
+.wk-text[data-layout="overlay"] {
+  padding: 0;
+  gap: 0;
+  background: var(--surface);
+  justify-content: flex-start;
+}
+
+/* The one thing kept from the text tile: a note's title is prose where a
+   frame's is a label, so it keeps the display face instead of taking
+   .wk-title's uppercase meta voice — at caption scale under the picture. */
+.wk-text[data-layout="hero"] .wk-t-title,
+.wk-text[data-layout="overlay"] .wk-t-title {
+  font-size: 0.92rem;
+  line-height: 1.16;
+  letter-spacing: -0.005em;
+}
+
+/* ---- OVERLAY layout (data-layout="overlay") — writing ON a picture ----
+   docs/cards-core-complete.md chunk 3. The image ladder, v1: the same nodes the
+   picture-led card already draws, with the body moved inside the 4:5 well and
+   turned into a band.
+
+   THE DIVISION OF LABOUR. js/recent-index.js decides and stamps four
+   attributes; every colour, gradient, blur and position below is this
+   stylesheet's, and there is not one value here the engine knows about:
+
+     data-place   bottom | top | centre    — the author's choice, where it sits
+     data-treat   scrim  | blur | none     — the author's choice, what's under it
+     data-blur    1 | 2 | 3                — only under the blur treatment
+     data-ink     light | dark             — DERIVED from measured luminance
+
+   ⚠️ THE BAND'S GROUND FOLLOWS THE INK, NOT THE THEME — and that is a departure
+   from the brief, which asked for a scrim "derived from the theme ground (the
+   pulse recipe)". It cannot be: the pulse card's veil is right because a pulse
+   card IS the page's surface, deepened. This band sits on a PHOTOGRAPH, and its
+   only job is to make one specific piece of type readable against one specific
+   picture. A theme-derived veil would go pale in Daylight while the ink over it
+   stayed light — destroying the exact legibility the layout exists to
+   guarantee. So the veil is the OPPOSITE of the ink, always, in both themes and
+   all five presets, which is the same argument .wk-tag's fixed rgba() already
+   makes one rule up: over a photo, contrast is a luminance decision, not a
+   theme decision. No hex here either way — the polarity is one token pair. */
+.wk-card[data-layout="overlay"] {
+  /* Light ink is the default because unmeasured answers 'light' (overlayInk). */
+  --ov-ink: rgba(255, 255, 255, 0.97);
+  --ov-ink-2: rgba(255, 255, 255, 0.78);
+  --ov-veil: 0, 0, 0;
+  --ov-blur: 10px;
+}
+.wk-card[data-layout="overlay"][data-ink="dark"] {
+  --ov-ink: rgba(0, 0, 0, 0.94);
+  --ov-ink-2: rgba(0, 0, 0, 0.7);
+  --ov-veil: 255, 255, 255;
+}
+
+/* THE PICTURE IS THE CARD. With the words on it there is no footer, so the well
+   GROWS to the card's floor instead of holding 4:5 and leaving the card's own
+   ground showing beneath it as a bare strip — which is what the equal-height
+   grid row produced next to a taller neighbour (owner, 2026-09-11: "the footer
+   goes blank and is just a bare shape"). 4:5 is still the basis: the well never
+   gets shorter than the crop, it only fills what the row gives it, and
+   background-size: cover keeps the picture whole. The console restates this.
+
+   ⚠️ `width: 100%` IS LOAD-BEARING, and it is the whole fix for a bug the first
+   version shipped with (owner, 2026-09-12: the ARCHIVE / RAW chip "gets cut
+   off"). `aspect-ratio` and `flex-grow` on the same box disagree across engines
+   the moment the box actually grows: Chromium keeps the stretched width and
+   only the height grows, while WebKit lets the RATIO compute the width from the
+   new height — so a 560px card whose row stretched it to 788 got a 630px well.
+   The well is clipped by the card's `overflow: hidden`, so the visible damage
+   lands on whatever sits against its right edge: the chip (positioned `right:
+   8px` INSIDE the well) was pushed 70px out and read "AR"; the band and the
+   photograph's own crop went with it. An explicit width is definite in every
+   engine, and a box with a definite width and a definite height ignores the
+   ratio — so there is nothing left to disagree about. The composer's own well
+   rule has paired them this way since chunk 2 for the same reason. */
+.wk-card[data-layout="overlay"] .wk-img {
+  flex: 1 0 auto;
+  width: 100%;
+}
+
+/* The band. Absolute inside the picture well, full width, and NOT a flex row of
+   the card any more — so .wk-body's `flex: 1 1 auto` (which exists to absorb an
+   equal-height row's slack) must be neutralised or the band stretches to the
+   whole frame. */
+.wk-card[data-layout="overlay"] .wk-body {
+  position: absolute;
+  left: 0;
+  right: 0;
+  flex: 0 0 auto;
+  gap: 3px;
+  z-index: 1;
+}
+.wk-card[data-layout="overlay"][data-place="bottom"] .wk-body {
+  bottom: 0;
+  padding: 48px 16px 16px;
+}
+.wk-card[data-layout="overlay"][data-place="top"] .wk-body {
+  top: 0;
+  padding: 16px 16px 48px;
+}
+/* Mid-height is the one placement where left-aligned type reads as an accident
+   rather than a choice — nothing anchors it. So centre centres, and the plate's
+   rule (below) centres with it. */
+.wk-card[data-layout="overlay"][data-place="centre"] .wk-body {
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 22px 18px;
+  text-align: center;
+  align-items: center;
+}
+
+/* THE CHIP AND THE BAND CANNOT SHARE A CORNER. The kicker stays where the kind
+   puts it — top-right on the picture — and at `top` placement the band lands on
+   top of it: the chip was half-covered and reading "…URED". So at that one
+   placement the chip crosses to the empty end of the picture instead of being
+   clipped or dropped, which keeps the card's identity cue and costs a rule.
+   The z-index is the belt: at `centre` a tall band on a short card could reach
+   it, and a chip behind a scrim is the same defect in a different corner. */
+.wk-card[data-layout="overlay"] .wk-tag { z-index: 2; }
+.wk-card[data-layout="overlay"][data-place="top"] .wk-tag {
+  top: auto;
+  bottom: 8px;
+}
+
+/* SCRIM: the veil, fading away from the edge the band is anchored to, so the
+   picture is only darkened where the words actually are. The centre plate is
+   flat — a gradient with no edge to fade from is just a smudge. */
+.wk-card[data-layout="overlay"][data-treat="scrim"][data-place="bottom"] .wk-body {
+  background: linear-gradient(to top,
+    rgba(var(--ov-veil), 0.8) 0%, rgba(var(--ov-veil), 0.46) 52%, rgba(var(--ov-veil), 0) 100%);
+}
+.wk-card[data-layout="overlay"][data-treat="scrim"][data-place="top"] .wk-body {
+  background: linear-gradient(to bottom,
+    rgba(var(--ov-veil), 0.8) 0%, rgba(var(--ov-veil), 0.46) 52%, rgba(var(--ov-veil), 0) 100%);
+}
+.wk-card[data-layout="overlay"][data-treat="scrim"][data-place="centre"] .wk-body {
+  background: rgba(var(--ov-veil), 0.52);
+}
+
+/* BLUR: the picture itself is the ground, softened. A thin veil rides with it —
+   blur alone removes detail but not brightness, and mid-grey mush is the one
+   thing type cannot sit on. Strength is the author's, in three steps. */
+.wk-card[data-layout="overlay"][data-treat="blur"] .wk-body {
+  background: rgba(var(--ov-veil), 0.24);
+  backdrop-filter: blur(var(--ov-blur)) saturate(105%);
+  -webkit-backdrop-filter: blur(var(--ov-blur)) saturate(105%);
+}
+.wk-card[data-layout="overlay"][data-blur="1"] { --ov-blur: 5px; }
+.wk-card[data-layout="overlay"][data-blur="2"] { --ov-blur: 10px; }
+.wk-card[data-layout="overlay"][data-blur="3"] { --ov-blur: 18px; }
+
+/* No backdrop-filter (older Firefox, and any engine with it disabled) falls back
+   to the scrim rather than to bare type on a photograph. The degradation is a
+   different look, never an unreadable card. */
+@supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
+  .wk-card[data-layout="overlay"][data-treat="blur"][data-place="bottom"] .wk-body {
+    background: linear-gradient(to top,
+      rgba(var(--ov-veil), 0.8) 0%, rgba(var(--ov-veil), 0.46) 52%, rgba(var(--ov-veil), 0) 100%);
+  }
+  .wk-card[data-layout="overlay"][data-treat="blur"][data-place="top"] .wk-body {
+    background: linear-gradient(to bottom,
+      rgba(var(--ov-veil), 0.8) 0%, rgba(var(--ov-veil), 0.46) 52%, rgba(var(--ov-veil), 0) 100%);
+  }
+  .wk-card[data-layout="overlay"][data-treat="blur"][data-place="centre"] .wk-body {
+    background: rgba(var(--ov-veil), 0.52);
+  }
+}
+
+/* NONE: the author has decided the picture can carry the words unaided. The ink
+   is still derived, and it still gets the one aid that costs the photograph
+   nothing — a shadow in the veil's polarity, which is what separates type from
+   a busy area without laying anything over the image. */
+.wk-card[data-layout="overlay"][data-treat="none"] .wk-body {
+  background: none;
+  text-shadow: 0 1px 3px rgba(var(--ov-veil), 0.55);
+}
+
+/* ---- THE PLATE: the band's type is a museum label, not a caption ----
+   (owner, 2026-09-11: "generic template, not inspiring — museum grade,
+   typographic scale, let the text be large in an intentional way.")
+
+   Both headline classes, because a frame's is .wk-title and a note's is
+   .wk-t-title — but on the band the kinds give up their footer voices and take
+   the plate's: the display face, SENTENCE CASE (the label's uppercase is a
+   caption-strip convention and shouts at this size), tight leading, negative
+   tracking that tightens as the size climbs. The size is the ladder the engine
+   stamps as data-scale from the title's length — the same move as the words
+   tile's data-tier: a two-word title is a statement, a forty-character one
+   steps down until its three lines fit. Nothing here measures anything. */
+.wk-card[data-layout="overlay"] .wk-title,
+.wk-card[data-layout="overlay"] .wk-t-title {
+  color: var(--ov-ink);
+  font-family: var(--font-display);
+  text-transform: none;
+  font-weight: 700;
+  font-size: 1.5rem;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  /* Three lines, not the footer's two — the band has the height, and the
+     ladder below is sized so the longest title lands inside them. */
+  -webkit-line-clamp: 3;
+}
+.wk-card[data-layout="overlay"][data-scale="statement"] .wk-title,
+.wk-card[data-layout="overlay"][data-scale="statement"] .wk-t-title {
+  font-size: clamp(2.4rem, 1.5rem + 3vw, 3.4rem);
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+}
+.wk-card[data-layout="overlay"][data-scale="feature"] .wk-title,
+.wk-card[data-layout="overlay"][data-scale="feature"] .wk-t-title {
+  font-size: clamp(1.9rem, 1.2rem + 2.2vw, 2.6rem);
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+}
+.wk-card[data-layout="overlay"][data-scale="standard"] .wk-title,
+.wk-card[data-layout="overlay"][data-scale="standard"] .wk-t-title {
+  font-size: 1.5rem;
+}
+.wk-card[data-layout="overlay"][data-scale="compact"] .wk-title,
+.wk-card[data-layout="overlay"][data-scale="compact"] .wk-t-title {
+  font-size: 1.18rem;
+  line-height: 1.14;
+  letter-spacing: -0.015em;
+}
+
+/* The full stop, in the accent. The one flourish the plate carries: the title
+   closes on the site's own colour, the way the words tile opens on it with the
+   drop cap. Stamped as data-mark only where the author did not already end the
+   line (js/recent-index.js overlayMark) — a second full stop is a typo. Drawn
+   by the stylesheet so it is never in the card's text: a screen reader, a
+   share sheet and the address bar all read the title as typed. */
+.wk-card[data-layout="overlay"][data-mark="dot"] .wk-title::after,
+.wk-card[data-layout="overlay"][data-mark="dot"] .wk-t-title::after {
+  content: '.';
+  color: var(--accent);
+}
+
+/* The caption becomes the plate's second line: the meta face, small, tracked,
+   uppercase, set off from the headline by a short RULE in the accent — the
+   same 2px the kicker's LED is, and the detail that makes a label read as
+   set rather than typed. It wraps: there is no footer below it to protect,
+   and a line clipped mid-word over a photograph looks like a bug, not a
+   bound. */
+.wk-card[data-layout="overlay"] .wk-meta {
+  color: var(--ov-ink-2);
+  white-space: normal;
+  font-size: 0.58rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  line-height: 1.5;
+  margin-top: 6px;
+}
+.wk-card[data-layout="overlay"] .wk-meta::before {
+  content: '';
+  display: block;
+  width: 22px;
+  height: 2px;
+  margin-bottom: 9px;
+  background: var(--accent);
+}
+.wk-card[data-layout="overlay"][data-place="centre"] .wk-meta::before {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (max-width: 900px) {
+  .cl-workgrid { grid-template-columns: 1fr 1fr; }
+  /* Show 4th card on tablet to form a perfect 2x2 grid */
+  .cl-workgrid .wk-card:nth-child(4) { display: flex; }
+}
+@media (max-width: 560px) {
+  .cl-workgrid { grid-template-columns: 1fr; }
+  /* Hide 4th card on mobile to keep vertical scroll height down */
+  .cl-workgrid .wk-card:nth-child(4) { display: none; }
+}
+
+/* ============================================
+   AUDIO PLAYER — frameless, drawn into the page
+   --------------------------------------------
+   No box, no stroke, no background of its own: the player sits on whatever
+   surface holds it the way the drop cap and the caret do. Every color is a
+   theme token, so all five presets and both modes get it for free and
+   tests/theme-tokens.test.js stays happy — there are no hardcoded colors here.
+
+   Progress is one custom property (--ap-progress, 0–1) written by
+   js/audio-player.js; the fill row is clipped to it, so the played/unplayed
+   split IS the progress UI and there is no second scrub track.
+   ============================================ */
+
+.ap {
+  --ap-progress: 0;
+  --ap-wave-h: 34px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+}
+
+/* ---- play/pause: a bare mark, never a circle or a pill ---- */
+.ap-play {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--fg);
+  transition: color 0.15s, transform 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.ap-glyph {
+  width: 13px;
+  height: 15px;
+  fill: currentColor;
+}
+.ap-glyph-pause { display: none; }
+.ap.is-playing .ap-play { color: var(--accent); }
+.ap.is-playing .ap-glyph-play { display: none; }
+.ap.is-playing .ap-glyph-pause { display: block; }
+@media (hover: hover) {
+  .ap-play:hover { color: var(--accent); transform: scale(1.08); }
+}
+.ap-play:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
+/* A track that could not load. Dimmed rather than red-flagged: it is a missing
+   file, not an alarm, and the player carries a title attribute that says so.
+   Without this a broken track is pixel-identical to an idle one. */
+.ap.is-error { opacity: 0.45; }
+.ap.is-error .ap-play { cursor: not-allowed; }
+.ap.is-error .ap-wave { cursor: default; }
+
+/* ---- the waveform IS the seek surface ---- */
+.ap-wave {
+  position: relative;
+  flex: 1 1 auto;
+  height: var(--ap-wave-h);
+  min-width: 0;
+  cursor: pointer;
+  touch-action: none;   /* drag scrubs, never scrolls the page */
+  /* A bar cannot shrink below 1px and the row carries a 2px gap, so a variant's
+     bar count sets a floor on the waveform's width (56 bars ≈ 166px on a card).
+     Below it the bars used to spill out of their box and print over the time
+     readout — narrow enough only happens in a squeezed column, but clipping is
+     the honest failure: fewer bars visible, nothing drawn on top of anything.
+     Clips descendants only, so the seek focus ring is untouched. */
+  overflow: hidden;
+}
+.ap-wave:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
+
+.ap-bars {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  pointer-events: none;
+}
+.ap-bar {
+  flex: 1 1 0;
+  min-width: 1px;
+  border-radius: 1px;
+  background: var(--faint);
+}
+
+/* The played half. Clipped to --ap-progress — one style write per frame, and
+   the colors stay in CSS where the theme can reach them. */
+.ap-bars-fill {
+  -webkit-clip-path: inset(0 calc(100% - var(--ap-progress) * 100%) 0 0);
+  clip-path: inset(0 calc(100% - var(--ap-progress) * 100%) 0 0);
+}
+.ap-bars-fill .ap-bar { background: var(--accent); }
+
+/* No peaks stored (legacy or hand-written entry): a quiet flat rail that still
+   seeks, rather than a collapsed player. */
+.ap-flat .ap-bars-base .ap-bar { background: var(--line); }
+
+.ap-time {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  min-width: 3.2em;
+  text-align: right;
+}
+
+/* ---- variants ---- */
+.ap-card { --ap-wave-h: 40px; }
+.ap-full { --ap-wave-h: 56px; gap: 14px; }
+.ap-full .ap-play { width: 30px; height: 30px; }
+.ap-full .ap-glyph { width: 17px; height: 19px; }
+.ap-full .ap-time { font-size: 0.7rem; }
+.ap-row { --ap-wave-h: 22px; gap: 9px; }
+.ap-row .ap-play { width: 18px; height: 18px; }
+.ap-row .ap-glyph { width: 10px; height: 12px; }
+.ap-row .ap-time { font-size: 0.58rem; min-width: 3em; }
+
+/* ============================================
+   AUDIO CARD — the update card that plays
+   --------------------------------------------
+   Same tile shell as the Field-Note text card, with the waveform where the
+   tease sits. Fed only from the audio registry (data/audio.json), never
+   deduced from a post's mix of text and media — see docs/audio-card-vision.md.
+   ============================================ */
+
+.wk-audio {
+  padding: 16px 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  overflow: hidden;
+  justify-content: center;
+
+  /* THE LISTENING ROOM — deeper than the tiles either side of it, because an
+     audio card is a place you stop rather than a thing you scan past.
+
+     DERIVED, never enumerated — the pulse card's recipe (see its block for the
+     full argument): one veil deepens whatever surface the active theme already
+     has, and the accent lays a wash over the top. That is why this is a stack
+     of gradients over --surface-2 rather than the hardcoded near-black it used
+     to be: five presets × two modes come out right for free, and a preset that
+     changes its surface takes every audio card with it.
+
+     Layer order, top to bottom: corner light · directional wash · veil · the
+     theme's own recessed surface. Quieter than a pulse at every layer — a
+     pulse is a signal shouting for a moment, this is a room. */
+  --audio-rgb: var(--accent-rgb);
+  --audio-veil: rgba(0, 0, 0, 0.55);
+  background:
+    radial-gradient(circle at 88% 0%, rgba(var(--audio-rgb), 0.12) 0%, transparent 58%),
+    linear-gradient(168deg, rgba(var(--audio-rgb), 0.055) 0%, rgba(var(--audio-rgb), 0.018) 55%, rgba(var(--audio-rgb), 0) 100%),
+    linear-gradient(var(--audio-veil), var(--audio-veil)),
+    var(--surface-2);
+}
+
+/* DAYLIGHT: the veil inverts rather than the card staying dark — the same flip
+   the pulse card makes, and for the same reason. A near-black tile on a paper
+   page is a hole punched in it; on paper the card reads as a recessed panel
+   with the accent still washing its top corner. */
+:root[data-theme="light"] .wk-audio {
+  --audio-veil: rgba(255, 255, 255, 0.5);
+}
+
+.wk-audio .wk-kicker {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  --pulse-rgb: var(--accent-rgb);
+}
+
+/* The title carries the only link on the card, stretched over the whole tile
+   by the ::after overlay. That keeps ONE anchor and ONE button in the markup
+   — a <button> nested inside an <a> would be invalid and unreadable to a
+   screen reader, which is the trap this pattern avoids. */
+.wk-a-title {
+  font-family: var(--font-display);
+  font-weight: 680;
+  font-size: 1.18rem;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  color: var(--fg-strong);
+  overflow: hidden;
+  white-space: nowrap;
+}
+.wk-a-title a {
+  color: inherit;
+  text-decoration: none;
+  display: inline-block;
+}
+.wk-a-title a::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+/* Long titles slide rather than truncate — but only while the card is hovered
+   or the track is playing, so a still page stays still. */
+.wk-a-title.is-long a {
+  animation: ap-title-scroll var(--ap-scroll-dur, 8s) ease-in-out infinite alternate;
+  animation-play-state: paused;
+}
+.wk-audio.is-playing .wk-a-title.is-long a { animation-play-state: running; }
+@media (hover: hover) {
+  .wk-audio:hover .wk-a-title.is-long a { animation-play-state: running; }
+}
+@keyframes ap-title-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(var(--ap-scroll, 0)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wk-a-title.is-long a { animation: none; }
+}
+
+.wk-a-sub {
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  line-height: 1.3;
+  color: var(--muted);
+  margin-top: -4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The player and the share button sit ABOVE the stretched link so they stay
+   pressable — without this the overlay would swallow every transport press. */
+.wk-audio .ap,
+.wk-a-share {
+  position: relative;
+  z-index: 2;
+}
+
+.wk-a-foot {
+  margin-top: 12px;
+  padding-top: 9px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.wk-a-meta {
+  font-family: var(--font-meta);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--faint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Rests at --faint and surfaces on hover/focus — present when wanted, gone
+   when not. */
+.wk-a-share {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--faint);
+  transition: color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.wk-a-share svg { width: 13px; height: 13px; fill: currentColor; }
+.wk-a-share.copied { color: var(--accent); }
+@media (hover: hover) {
+  .wk-a-share:hover { color: var(--accent); }
+}
+.wk-a-share:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+
+/* ---- the author's caption on a COMPOSED audio card (chunk 5) ----
+   A composed audio card can carry two lines of the owner's own, and they use
+   the picture card's caption grammar — .wk-title / .wk-meta — because that is
+   what they ARE. §2.2 of docs/cards-core-complete.md: words on an audio card
+   are a caption, never a statement, so nothing here reaches for the display
+   face, the drop cap or the tier ladder. The waveform is the hero.
+
+   .wk-body arrives carrying the PICTURE card's rules — its own padding, and
+   `flex: 1 1 auto` to fill a stretched tile — and both are wrong inside a card
+   that already has 16px of padding and centres its own column: the padding
+   double-indents the caption and the flex pushes the transport upward. The
+   audio card resets them here rather than the shared rule growing a branch. */
+.wk-audio .wk-body {
+  padding: 0;
+  flex: 0 0 auto;
+  gap: 3px;
+}
+
+/* Playlist variation on single card — lean ultra-lux typographic layout.
+   Background is inherited from .wk-audio above; it does NOT get its own.
+
+   THE CARD IS A HEADER OVER AN INDEX (owner call, 2026-08-14). It used to be
+   one centred stack: kicker, title, a small waveform, then the track list
+   floating in the middle of the tile with air above and below it. Nothing tied
+   the waveform to the tracks it played — it read as a stray control.
+
+   So the top of the card is now a HEAD — kicker, title, and a waveform tall
+   enough to be the card's artwork — and the index hangs directly beneath it
+   under a full-bleed rule, the way a record's back cover sets a title block
+   over a tracklist. The foot pins to the bottom edge. */
+.wk-audio-playlist {
+  gap: 8px;
+  justify-content: flex-start;
+}
+
+/* The head's waveform is the artwork, so it gets height the single card's
+   inline transport does not need. Still the same player — one variant, one
+   custom property; nothing about the markup changes. */
+.wk-audio-playlist .ap {
+  --ap-wave-h: 96px;
+  margin-top: 6px;
+  margin-bottom: 2px;
+}
+
+/* Pinned to the bottom edge so the index reads as hanging from the head rather
+   than floating between two pools of air. */
+.wk-audio-playlist .wk-a-foot {
+  margin-top: auto;
+}
+
+/* ---- the index hangs from the head, and adapts to HOW MANY tracks -------
+   Two through six rows have to fill the same tile as a text card without
+   overflowing at six or leaving a void at two.
+
+   Two mechanisms, both deterministic (no runtime measurement — the offline
+   export has no layout to measure and must render identically):
+
+   1. THE RULE AND THE BLEED. The top border runs edge to edge, so it reads as
+      the line under a header rather than a box drawn around a list. The
+      negative margin buys those 16px back; the padding puts the row text
+      exactly on the title's left edge once each row's own 6px is counted.
+   2. THE ROWS SHARE WHAT IS LEFT. `flex: 1 1 0` lets them absorb the tile's
+      slack instead of stacking at the top over dead space — capped per rung so
+      two tracks read as generous rather than as two rows marooned half a tile
+      apart. Whatever the cap leaves over is centred, which is why the block
+      still looks placed at every count.
+
+   The ladder (playlistTier() in recent-index.js, mirroring the text card's
+   data-tier) steps type and density DOWN as the count goes up. */
+.wk-pl-index {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  justify-content: center;
+  margin: 2px -16px 0;
+  padding: 12px 10px 0;
+  border-top: 1px solid var(--line-2);
+  position: relative;
+  z-index: 2;
+  gap: 7px;
+}
+
+/* 1–2 tracks — generous: the index reads as a statement, not a list. */
+.wk-audio-playlist[data-tier="roomy"] .wk-pl-index { gap: 10px; }
+.wk-audio-playlist[data-tier="roomy"] .wk-pl-item { padding: 5px 6px; max-height: 60px; }
+.wk-audio-playlist[data-tier="roomy"] .wk-pl-name { font-size: 0.94rem; }
+.wk-audio-playlist[data-tier="roomy"] .wk-pl-num  { font-size: 0.70rem; }
+
+/* 3–4 tracks — the middle rung, near the inherited default. */
+.wk-audio-playlist[data-tier="balanced"] .wk-pl-index { gap: 7px; }
+.wk-audio-playlist[data-tier="balanced"] .wk-pl-item { padding: 4px 6px; max-height: 46px; }
+.wk-audio-playlist[data-tier="balanced"] .wk-pl-name { font-size: 0.86rem; }
+.wk-audio-playlist[data-tier="balanced"] .wk-pl-num  { font-size: 0.65rem; }
+
+/* 5–6 tracks — tighten so six rows still clear the footer. */
+.wk-audio-playlist[data-tier="dense"] .wk-pl-index { gap: 4px; }
+.wk-audio-playlist[data-tier="dense"] .wk-pl-item { padding: 2px 6px; max-height: 34px; }
+.wk-audio-playlist[data-tier="dense"] .wk-pl-name { font-size: 0.78rem; }
+.wk-audio-playlist[data-tier="dense"] .wk-pl-num  { font-size: 0.60rem; }
+.wk-pl-item {
+  display: flex;
+  /* Centred, not baseline-aligned: a row that has grown into the tile's slack
+     is taller than its own type, and baseline alignment would strand the text
+     at the top of it. The leader carries a compensating nudge (below) so the
+     dots still land where the eye expects, on the baseline. */
+  align-items: center;
+  flex: 1 1 0;
+  gap: 8px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.wk-pl-item:hover {
+  background: rgba(var(--accent-rgb, 239, 68, 68), 0.08);
+}
+.wk-pl-item.is-active {
+  background: rgba(var(--accent-rgb, 239, 68, 68), 0.12);
+}
+.wk-pl-num {
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  font-weight: 500;
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+  flex: none;
+}
+.wk-pl-item.is-active .wk-pl-num,
+.wk-pl-item:hover .wk-pl-num {
+  color: var(--accent);
+  font-weight: 700;
+}
+.wk-pl-name {
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--fg-strong);
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 0 1 auto;
+  max-width: 65%;
+}
+.wk-pl-item:hover .wk-pl-name,
+.wk-pl-item.is-active .wk-pl-name {
+  color: var(--accent);
+}
+.wk-pl-leader {
+  flex: 1 1 0;
+  border-bottom: 1px dotted var(--line-2);
+  /* The row centres its items, so a zero-height leader would draw through the
+     middle of the type. Half an em of margin above it pushes the dots back down
+     to the baseline the names and durations sit on. */
+  margin-top: 0.5em;
+  min-width: 8px;
+  opacity: 0.35;
+}
+.wk-pl-dur {
+  font-family: var(--font-mono);
+  font-size: 0.60rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  flex: none;
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  border-top: 1px solid var(--gray-800);
+  padding: 10px 32px;
+  padding-bottom: max(10px, env(safe-area-inset-bottom, 10px));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(var(--bg-rgb), 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* THE HOMEPAGE FOOTER IS THE SAME FOOTER. It used to opt out of `fixed` here
+   — `position: relative`, solid black, no blur — from when the homepage was one
+   screen tall and the bar genuinely was the bottom of it. The recent-work grid
+   made the page scroll, so the opt-out quietly turned the site's one persistent
+   piece of chrome into something you had to go looking for: every other page
+   kept its bar on screen, the front door dropped it below the fold (measured
+   2026-09-19 at 1024×768: 1051px of document, bar at y=1012).
+   Removing the override is the whole fix — the homepage now inherits the bar
+   the rest of the site has, including the blur, which is also what makes the
+   `main-footer` view transition between home and anywhere else morph one fixed
+   bar into another instead of a relative box into a fixed one.
+   `.page--home .cl-work` carries the clearance for it. */
+
+.footer-left {
+  font-family: var(--font-mono);
+  font-size: 0.52rem;
+  letter-spacing: 2px;
+  color: var(--gray-700);
+  text-transform: uppercase;
+}
+
+.footer-left .accent {
+  color: var(--red);
+}
+
+.footer-right {
+  font-family: var(--font-mono);
+  font-size: 0.48rem;
+  letter-spacing: 2px;
+  color: var(--gray-800);
+  text-transform: uppercase;
+}
+
+/* "Powered by Oaklens OS" — the template's only self-promotion (spec §5).
+   Small, mono, hairline chip; brightens on hover, never louder than that. */
+.powered-chip {
+  display: inline-block;
+  margin-left: 14px;
+  font-family: var(--font-meta);
+  font-size: 0.52rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: var(--r-chip);
+  padding: 3px 8px;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.powered-chip strong { font-weight: 600; }
+
+.powered-chip:hover {
+  color: var(--fg);
+  border-color: var(--line-2);
+}
+
+.wx-telemetry {
+  display: inline;
+}
+
+.wx-label {
+  color: #444;
+}
+
+.wx-sep {
+  color: #444;
+}
+
+.wx-data {
+  color: #777;
+}
+
+/* Archive manifest link: blends into the footer telemetry readout.
+   Inherits font/size/letter-spacing/text-transform from .footer-left;
+   one shade darker than the surrounding text, and visually static (no hover). */
+.footer-manifest,
+.footer-manifest:hover {
+  color: var(--gray-900);
+  text-decoration: none;
+}
+
+/* Reserve space before JS injects count text — prevents CLS (0.12 score on both) */
+#wall-count,
+#archive-count-line {
+  min-height: 1.5em; /* ~13px at font-size: 0.55rem; covers one text line + leading */
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-group(main-nav),
+::view-transition-group(nav-logo),
+::view-transition-group(main-footer) {
+  animation-duration: 0.28s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+.nav {
+  view-transition-name: main-nav;
+}
+
+.nav-logo {
+  view-transition-name: nav-logo;
+}
+
+.footer {
+  view-transition-name: main-footer;
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(8px);
+  animation: revealUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes revealUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reveal-d1 { animation-delay: 0.1s; }
+.reveal-d2 { animation-delay: 0.25s; }
+.reveal-d3 { animation-delay: 0.35s; }
+.reveal-d4 { animation-delay: 0.5s; }
+.reveal-d5 { animation-delay: 0.65s; }
+
+.blink {
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+/* ============================================
+   RESPONSIVE — MOBILE
+   ============================================ */
+
+@media (max-width: 900px) {
+  .nav {
+    padding: 0 16px;
+  }
+
+  .nav-links {
+    display: none;
+  }
+
+  .nav-hamburger {
+    display: flex;
+  }
+
+  .nav-mobile {
+    display: block;
+  }
+
+  /* The homepage scrolls on mobile now, so its nav has to stick like every
+     other page's. The mobile menu panel is position:fixed at top:var(--nav-h);
+     with a nav that scrolls away, the panel stayed pinned to the viewport and
+     visibly detached from the header. (The desktop `position: relative`
+     override is left alone — the links live inline in the bar there.) */
+  .page--home .nav {
+    position: sticky;
+    top: 0;
+  }
+
+  .footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 10px 16px;
+    padding-bottom: max(10px, env(safe-area-inset-bottom, 10px));
+  }
+
+  /* The homepage's own fixed-footer block used to live here, re-stating
+     `position: fixed` and clawing back the `z-index: 50` that the desktop
+     override dropped. Both are the base `.footer` again at every width, so
+     there is nothing left for this breakpoint to say about it. */
+
+  /* Homepage mobile — scrolls now (the recent-work grid is taller than one
+     screen); the hero still fills the first viewport. */
+  .page--home {
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .footer-right {
+    display: none;
+  }
+
+  .wx-telemetry {
+    display: none;
+  }
+}
+
+/* ========================================
+   GET THE DROP — Email Subscription
+   ======================================== */
+
+/* Pulsing red dot */
+.gtd-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  opacity: 0.6;
+  box-shadow: 0 0 6px 2px rgba(var(--accent-rgb), 0.3);
+  animation: gtd-pulse 3.5s ease-in-out infinite;
+  margin-right: 10px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+@keyframes gtd-pulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 0.4; }
+}
+.gtd-dot--solid {
+  animation: none;
+  opacity: 0.8;
+  box-shadow: 0 0 6px 2px rgba(var(--accent-rgb), 0.3);
+}
+
+/* Email input */
+.gtd-input {
+  background-color: var(--bg);
+  border: 1px solid #222;
+  color: var(--fg);
+  font-family: 'Syne Mono', monospace;
+  font-size: 16px;
+  padding: 10px 14px;
+  outline: none;
+  transition: border-color 0.2s;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border-radius: 0;
+  -webkit-text-fill-color: var(--fg);
+  -webkit-opacity: 1;
+  box-sizing: border-box;
+}
+.gtd-input:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+.gtd-input::placeholder {
+  color: #444;
+  font-family: 'Syne Mono', monospace;
+  -webkit-text-fill-color: #444;
+  opacity: 1;
+}
+
+/* Submit arrow */
+.gtd-submit {
+  background: transparent;
+  color: var(--accent);
+  border: none;
+  font-family: 'Syne Mono', monospace;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  transition: color 0.2s;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border-radius: 0;
+  padding: 0;
+}
+.gtd-submit:hover { color: var(--accent-text); }
+.gtd-submit:disabled { color: var(--faint); cursor: not-allowed; }
+
+/* Success + error text */
+.gtd-success {
+  font-family: 'Syne Mono', monospace;
+  font-size: 13px;
+  color: rgba(var(--accent-rgb), 0.7);
+  letter-spacing: 0.02em;
+}
+.gtd-error {
+  font-family: 'Syne Mono', monospace;
+  font-size: 12px;
+  color: var(--accent);
+  margin-top: 6px;
+}
+
+/* Honeypot */
+.gtd-hp {
+  position: absolute;
+  left: -9999px;
+  opacity: 0;
+  height: 0;
+  width: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* --- theWall placement --- */
+.gtd-wall {
+  margin: 20px 0 30px 0;
+}
+.gtd-wall-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.gtd-wall-label {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+.gtd-wall-label span:last-child {
+  font-family: 'Syne Mono', monospace;
+  font-weight: 400;
+  font-size: 12px;
+  color: #888;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.gtd-wall-fields {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+.gtd-wall-fields .gtd-input {
+  width: 260px;
+}
+.gtd-wall-ok {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+}
+@media (max-width: 600px) {
+  .gtd-wall-form {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .gtd-wall-fields {
+    width: 100%;
+  }
+  .gtd-wall-fields .gtd-input {
+    width: 100%;
+    flex: 1;
+  }
+}
+
+/* --- Photo lab placement --- */
+.gtd-lab-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 0;
+  animation: gtd-slide 0.2s ease-out;
+}
+@keyframes gtd-slide {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.gtd-lab-form {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  position: relative;
+}
+.gtd-lab-form .gtd-input {
+  flex: 1;
+  min-width: 200px;
+}
+.gtd-lab-ok {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* --- About sidebar placement --- */
+.gtd-about-panel {
+  margin-top: 8px;
+  animation: gtd-slide 0.2s ease-out;
+  max-width: 100%;
+}
+.gtd-about-form {
+  display: flex;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.gtd-about-form .gtd-input {
+  flex: 1;
+  font-size: 14px;
+}
+.gtd-about-form .gtd-submit {
+  font-size: 16px;
+}
+
+/* ============================================
+   LIGHTTABLE COMPONENTS
+   Shared: buffer page + blog post embeds
+   ============================================ */
+
+/* ---- DAY BLOCK ---- */
+
+.day-block {
+  margin-bottom: 48px;
+  position: relative;
+  opacity: 0;
+  transform: translateY(8px);
+  animation: ltRevealUp 0.6s ease forwards;
+}
+
+.day-block:nth-child(1) { animation-delay: 0ms; }
+.day-block:nth-child(2) { animation-delay: 80ms; }
+.day-block:nth-child(3) { animation-delay: 160ms; }
+.day-block:nth-child(4) { animation-delay: 240ms; }
+.day-block:nth-child(5) { animation-delay: 320ms; }
+
+@keyframes ltRevealUp {
+  to { opacity: 1; transform: none; }
+}
+
+/* ---- DAY HEADER ---- */
+
+.day-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 1.5px;
+  margin-bottom: 10px;
+  padding-left: 2px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.2s ease;
+}
+
+.day-header:active {
+  opacity: 0.6;
+}
+
+.day-mark {
+  color: var(--red);
+  font-weight: 700;
+  letter-spacing: 0;
+  flex-shrink: 0;
+}
+
+.day-date {
+  color: var(--white);
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.day-dots {
+  flex: 1;
+  height: 1px;
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--gray-800) 0px, var(--gray-800) 3px,
+    transparent 3px, transparent 7px
+  );
+}
+
+.day-count {
+  color: var(--gray-700);
+  font-size: 0.68rem;
+  letter-spacing: 2px;
+  text-transform: lowercase;
+  flex-shrink: 0;
+}
+
+/* ---- RED END-OF-DAY MARK ---- */
+
+.day-end-mark {
+  width: 20px;
+  height: 1.5px;
+  background: var(--red);
+  margin-top: 6px;
+  opacity: 0.7;
+}
+
+/* ---- CONTACT GRID ---- */
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 5px;
+}
+
+/* ---- FRAME ---- */
+
+.frame {
+  position: relative;
+  aspect-ratio: 3 / 2;
+  background: var(--surface);
+  overflow: hidden;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: border-color 150ms ease;
+}
+
+.frame:hover {
+  border-color: var(--red);
+}
+
+/* ---- EMULSION (light table) ---- */
+
+.emulsion {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  background-color: #121212;
+  transition: background-color 0.7s ease-out;
+}
+
+.day-block.lit .emulsion {
+  background-color: #ffffff;
+}
+
+.emulsion img {
+  width: 100%;
+  height: 100%;
+  margin: 0 !important;
+  object-fit: cover;
+  display: block;
+  opacity: 0.98;
+  filter: brightness(0.25) contrast(1.4) saturate(0.8);
+  transition: opacity 0.7s ease-out, filter 0.7s ease-out;
+}
+
+/* Burst cells participate in the light table like regular .emulsion frames */
+.day-block.igniting .burst-img {
+  animation: flicker-warmup 0.8s ease-in-out forwards;
+}
+
+.day-block.lit .burst-img {
+  opacity: 0.88;
+  filter: brightness(1.1) contrast(1.15) saturate(1.1);
+}
+
+.day-block.lit .burst-cell:hover .burst-img {
+  opacity: 0.92;
+  filter: brightness(1.15) contrast(1.1) saturate(1.15);
+}
+
+
+.post-body .emulsion img {
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
+  max-width: none;
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes flicker-warmup {
+  0%   { opacity: 0.98; filter: brightness(0.25) contrast(1.4) saturate(0.8); }
+  10%  { opacity: 0.88; filter: brightness(1.2) contrast(1.15) saturate(1.1); }
+  20%  { opacity: 0.98; filter: brightness(0.3) contrast(1.3) saturate(0.8); }
+  40%  { opacity: 0.88; filter: brightness(1.1) contrast(1.15) saturate(1.1); }
+  50%  { opacity: 0.95; filter: brightness(0.5) contrast(1.2) saturate(0.9); }
+  100% { opacity: 0.88; filter: brightness(1.1) contrast(1.15) saturate(1.1); }
+}
+
+.day-block.igniting .emulsion img {
+  animation: flicker-warmup 0.8s ease-in-out forwards;
+}
+
+.day-block.lit .emulsion img {
+  opacity: 0.88;
+  filter: brightness(1.1) contrast(1.15) saturate(1.1);
+}
+
+.day-block.lit .frame:hover .emulsion img {
+  opacity: 0.92;
+  filter: brightness(1.15) contrast(1.1) saturate(1.15);
+}
+
+/* ---- IGNITE BUTTON ---- */
+
+.ignite-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 3px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 200ms ease, transform 150ms ease;
+  opacity: 0.25;
+}
+
+.ignite-btn svg {
+  width: 10px;
+  height: 13px;
+  fill: var(--fg);
+  transition: fill 200ms ease, filter 200ms ease;
+}
+
+.ignite-btn:hover {
+  opacity: 0.6;
+  transform: scale(1.15);
+}
+
+.ignite-btn.lit {
+  opacity: 1;
+}
+
+.ignite-btn.lit svg {
+  fill: var(--fg);
+  filter: drop-shadow(0 0 3px rgba(224, 224, 224, 0.3));
+}
+
+@keyframes ignite-pulse {
+  0%, 100% { opacity: 0.18; }
+  50%      { opacity: 0.38; }
+}
+
+.ignite-btn.pulsing {
+  animation: ignite-pulse 3s ease-in-out infinite;
+}
+
+.ignite-btn.pulsing:hover {
+  animation: none;
+  opacity: 0.6;
+}
+
+/* ---- FRAME TAG ---- */
+
+.frame-tag {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  z-index: 3;
+  background: rgba(0, 0, 0, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 0px 3px 1px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.frame-tag .tag-id {
+  font-family: var(--font-mono);
+  font-size: 7px;
+  letter-spacing: 1.5px;
+  color: var(--red);
+  opacity: 0.8;
+}
+
+.frame:hover .frame-tag {
+  background: rgba(0, 0, 0, 0.9);
+  border-color: var(--red-dim);
+}
+
+.frame:hover .frame-tag .tag-id {
+  opacity: 1;
+}
+
+/* ARCHIVED badge */
+.frame.archived::after {
+  content: '▲ ARCHIVED';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  color: var(--red);
+  letter-spacing: 2px;
+  padding: 3px 6px 2px;
+  background: rgba(0, 0, 0, 0.78);
+  border: 1px solid var(--red);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ---- FRAME REFS (f#234 citations in FN// bodies — manual §5.20) ----
+   The markdown engine emits <a class="frame-ref" data-frame="234">; the post
+   page resolves the number against buffer.json at hydrate time. Resolved refs
+   deep-link into the buffer; unresolvable ones degrade to a plain span. */
+.post-body a.frame-ref {
+  font-family: var(--font-mono);
+  color: var(--red);
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(var(--accent-rgb), 0.45);
+  white-space: nowrap;
+}
+
+.post-body a.frame-ref:hover,
+.post-body a.frame-ref:focus-visible {
+  border-bottom-style: solid;
+  border-bottom-color: var(--red);
+}
+
+.post-body .frame-ref-missing {
+  font-family: var(--font-mono);
+  color: var(--gray-500);
+  border-bottom: 1px dotted var(--gray-700);
+  cursor: help;
+  white-space: nowrap;
+}
+
+/* The hover card: a slide-film mount holding a 480w thumb (or the dark '//'
+   cell for retired frames). One singleton element, positioned by the link;
+   dependency-free — shown/hidden by the post page's hydration script. */
+.frame-ref-card {
+  position: absolute;
+  z-index: 400;
+  width: 240px;
+  padding: 10px 10px 8px;              /* the slide mount's cardboard border */
+  background: #161616;
+  border: 1px solid var(--gray-800);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.65);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  transition: opacity 0.16s ease, transform 0.16s ease, visibility 0.16s;
+  pointer-events: none;
+}
+
+.frame-ref-card.is-open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.frame-ref-card .frc-window {
+  position: relative;
+  aspect-ratio: 3 / 2;
+  background: var(--surface);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.frame-ref-card .frc-window img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  margin: 0;
+}
+
+.frame-ref-card .frc-window .dark-glyph {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  color: #2b2b2b;
+  letter-spacing: 2px;
+}
+
+.frame-ref-card .frc-dark-label {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  letter-spacing: 2px;
+  color: var(--gray-500);
+}
+
+.frame-ref-card .frc-caption {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 2px;
+  color: var(--gray-300);
+  text-transform: uppercase;
+  text-align: center;
+  margin-top: 8px;
+}
+
+.frame-ref-card .frc-caption .accent { color: var(--red); }
+
+.frame-ref-card .frc-open {
+  display: none;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 2px;
+  color: var(--red);
+  text-decoration: none;
+  text-align: center;
+  margin-top: 8px;
+  padding: 6px 0 5px;
+  border: 1px solid rgba(var(--accent-rgb), 0.35);
+}
+
+/* Touch: no hover — the first tap opens the card, the explicit action inside
+   navigates. (The post script gates taps; this only reveals the button.) */
+@media (hover: none) {
+  .frame-ref-card .frc-open { display: block; }
+}
+
+/* ---- DARK FRAME (retired tombstone — manual §5.20) ----
+   Holds a retired frame's positional slot forever: same grid footprint, same
+   frame tag, no image, no interaction. The '//' glyph sits one shade above
+   black — the imgError placeholder palette (#2b2b2b on #0a0a0a). It stays
+   dark even when its day-block is lit: the light table has nothing to show. */
+.frame-dark {
+  cursor: default;
+}
+
+.frame-dark:hover {
+  border-color: transparent;
+}
+
+.frame-dark .emulsion,
+.day-block.lit .frame-dark .emulsion,
+.day-block.igniting .frame-dark .emulsion {
+  background-color: #0a0a0a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.frame-dark .dark-glyph,
+.strip-frame-dark .dark-glyph {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  color: #2b2b2b;
+  letter-spacing: 2px;
+  user-select: none;
+}
+
+/* Dark slot inside a burst contact strip: inert, same footprint. */
+.strip-frame-dark {
+  cursor: default;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---- LIGHTBOX ---- */
+
+.lightbox {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: rgba(0, 0, 0, 0.94);
+  cursor: zoom-out;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.lightbox.is-open {
+  display: flex;
+}
+
+/* Closing: dissolve the overlay while the image zooms back out (.lightbox-img
+   transition) so it recedes into the page — the mirror of the open push-in,
+   instead of a hard cut. JS removes is-open only after this finishes. */
+.lightbox.is-closing {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Return-to-shelf (field-note hero): the photo FLIPs back onto its hero spot
+   (JS-driven transform on .lightbox-img) while the backdrop dissolves around
+   it. We fade the BACKGROUND alpha — not the whole overlay's opacity — so the
+   flying photo stays fully opaque and lands solidly on the page hero behind it.
+   The mini-map, counter and × drop out instantly so only the photo travels. */
+.lightbox.is-returning {
+  background: rgba(0, 0, 0, 0) !important;
+  pointer-events: none;
+  transition: background 0.44s ease;
+}
+
+.lightbox.is-returning .lightbox-close,
+.lightbox.is-returning .lightbox-counter,
+.lightbox.is-returning .minimap-hud {
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+
+.lightbox-img {
+  max-width: 90vw;
+  max-height: 82vh;
+  object-fit: contain;
+  display: block;
+  cursor: zoom-in;
+  transition: transform 0.3s cubic-bezier(0.2, 0, 0.2, 1);
+  transform-origin: center center;
+}
+
+.lightbox.is-zoomed .lightbox-img { cursor: crosshair; }
+
+/* Close affordance — a single bare red × in the corner of the IMAGE itself
+   (the stage shrink-wraps the photo). No box; just the character. A 44px hit
+   area keeps it tappable while the glyph stays small; a dark shadow keeps it
+   legible over a blown-out corner. */
+.lightbox-stage {
+  position: relative;
+  display: inline-block;
+  line-height: 0;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 7px 9px;
+  background: none;
+  border: none;
+  color: var(--red);
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 521;
+  opacity: 0.92;
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.9), 0 1px 2px rgba(0, 0, 0, 0.9);
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.lightbox-close:hover { opacity: 1; transform: scale(1.12); }
+
+/* Zoomed in (mini-map / loupe mode) the × would float over the middle of the
+   magnified frame with nothing to anchor it — so it bows out. Click the image,
+   tap the backdrop, or Esc to leave zoom; the × returns at fit. */
+.lightbox.is-zoomed .lightbox-close {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.lightbox-counter {
+  position: absolute;
+  bottom: 16px;
+  right: 20px;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  color: var(--gray-700);
+  letter-spacing: 2px;
+  z-index: 510;
+  transition: bottom 0.3s ease;
+}
+
+.lightbox.is-zoomed .lightbox-counter {
+  bottom: 108px;
+}
+
+.minimap-hud {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 120px;
+  height: 80px;
+  background: rgba(0,0,0,0.85);
+  border: 1px solid var(--gray-700);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 510;
+}
+
+.lightbox.is-zoomed .minimap-hud { opacity: 1; visibility: visible; }
+.minimap-thumb { width: 100%; height: 100%; object-fit: contain; opacity: 0.5; }
+.minimap-reticle { position: absolute; border: 1px solid var(--red); background: rgba(var(--accent-rgb), 0.08); }
+
+.lightbox-meta {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--gray-500);
+  letter-spacing: 2px;
+  margin-top: 16px;
+  text-transform: uppercase;
+}
+
+.lightbox-meta .accent { color: var(--red); }
+
+/* ---- BLOG INSPECT THEME (field notes only) ----
+   Set via LightTable.open({ theme: 'blog' }); removed on close. For now this is
+   simply a slightly deeper backdrop than the standard lightbox, marking the
+   field-note light table as a distinct space. (A red "darkroom safelight" glow
+   lived here previously — parked for a future, more deliberate treatment; the
+   theme hook is kept so it can be re-added in one place.) */
+.lightbox.lb-blog {
+  background: rgba(0, 0, 0, 0.97);
+}
+
+/* ---- MOBILE OVERRIDES (shared components) ---- */
+
+@media (max-width: 640px) {
+  .contact-grid {
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 3px;
+  }
+
+  .frame-tag { top: 2px; left: 2px; padding: 0px 2px 1px; }
+  .frame-tag .tag-id { font-size: 5.5px; letter-spacing: 1px; }
+
+  .ignite-btn { display: none !important; }
+
+  .day-header.hint-pulse .day-mark {
+    animation: ignite-pulse 3s ease-in-out infinite;
+  }
+}
+
+@media (max-width: 400px) {
+  .contact-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .day-block,
+  .emulsion,
+  .emulsion img,
+  .ignite-btn,
+  .lightbox-img,
+  .minimap-hud {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  /* The 0.01ms collapse above is correct for one-shot reveal/flicker
+     animations, but the idle "tap me" hint pulses run `infinite` — squeezing
+     an infinite pulse into 0.01ms turns a gentle fade into a strobe/fast-blink
+     (visible in iOS browsers, where OS-level Reduce Motion is honored). Stop
+     these outright instead of speeding them up. */
+  .ignite-btn.pulsing,
+  .day-header.hint-pulse .day-mark {
+    animation: none !important;
+  }
+}
+
+/* ── interpolate-size: native height:auto transitions (Safari 26.4+) ── */
+@supports (interpolate-size: allow-keywords) {
+  :root { interpolate-size: allow-keywords; }
+}
+
+/* ============================================
+   BURST SEQUENCES — Film Gate + Contact Strip
+   Shared: buffer page + blog post embeds
+   ============================================ */
+
+/* ---- FILM GATE (the cycling cell) ---- */
+
+.burst-cell {
+  position: relative;
+  aspect-ratio: 3 / 2;
+  background: var(--surface);
+  overflow: hidden;
+  cursor: pointer;
+  border: 1px solid transparent;
+  outline: none;
+  transition: border-color 150ms ease;
+  /* stacked-film shadow */
+  box-shadow: 3px 3px 0 rgba(var(--accent-rgb), 0.2), 6px 6px 0 rgba(var(--accent-rgb), 0.08);
+  /* mobile: browser owns vertical scroll; we own horizontal scrub */
+  touch-action: pan-y;
+  /* Grid items default to min-width/min-height: auto, which refuses to shrink
+     below the content's intrinsic size. Safari/Gecko keep .burst-img out of
+     flow so it contributes nothing — but the Instagram in-app webview lets the
+     image's intrinsic size leak into the item's auto-minimum, blowing the cell
+     out to full-size on load. Pinning the minimums to 0 keeps the cell at its
+     aspect-ratio box everywhere; overflow:hidden then clips the cover image. */
+  min-width: 0;
+  min-height: 0;
+}
+
+.burst-cell:hover { border-color: var(--red); }
+
+.burst-cell:focus-visible {
+  border-color: var(--red);
+  box-shadow: 0 0 0 1px var(--red), 3px 3px 0 rgba(var(--accent-rgb), 0.2), 6px 6px 0 rgba(var(--accent-rgb), 0.08);
+}
+
+.burst-cell.strip-open { border-color: var(--red); }
+
+.burst-img {
+  /* Fill the cell as an out-of-flow layer so the cell's height resolves purely
+     from aspect-ratio (matching .frame). An in-flow <img> with height:100%
+     lets its intrinsic height leak into the grid item in WebKit/Gecko, which
+     collapses/grows the cell and pushes the absolutely-positioned overlays
+     into the document flow below the image. */
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: brightness(0.25) contrast(1.4) saturate(0.8);
+  transition: opacity 0.7s ease-out, filter 0.7s ease-out;
+}
+
+/* ---- COUNTER PILL + BREATHING DOT ---- */
+
+.burst-counter {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 5px;
+  background: rgba(0, 0, 0, 0.82);
+  pointer-events: none;
+  line-height: 1;
+}
+
+.burst-counter-text {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--red);
+  line-height: 1;
+}
+
+.burst-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--red);
+  flex-shrink: 0;
+  opacity: 1;
+  animation: breathe 2.5s ease-in-out infinite;
+}
+
+/* dormant: dimmer, slower pulse */
+.burst-cell.dormant .burst-dot {
+  opacity: 0.6;
+  animation: breathe-dormant 4s ease-in-out infinite;
+}
+
+/* actively cycling (incl. a hovered dormant burst) overrides the dormant dot */
+.burst-cell.cycling .burst-dot {
+  opacity: 1;
+  animation: breathe 2.5s ease-in-out infinite;
+}
+
+/* frozen while the strip is open */
+.burst-cell.static .burst-dot {
+  opacity: 0.35;
+  animation: none;
+}
+
+@keyframes breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+
+@keyframes breathe-dormant {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 0.3; }
+}
+
+/* ---- REBATE LABEL ---- */
+
+.burst-rebate {
+  position: absolute;
+  bottom: 4px;
+  left: 5px;
+  z-index: 3;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 1px;
+  color: var(--red);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* ---- HOVER HINT ---- */
+
+.burst-hint {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: var(--white-bright);
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.burst-cell:hover .burst-hint { opacity: 1; }
+/* hide while actively cycling or when the strip is open (rules placed after
+   :hover so equal-specificity source order wins) */
+.burst-cell.cycling .burst-hint,
+.burst-cell.strip-open .burst-hint { opacity: 0; }
+
+/* ---- STRIP WRAPPER (grid expansion container) ---- */
+
+.burst-strip-wrapper {
+  /* Lives in normal document flow BELOW the contact grid (no longer a grid
+     child), so it never forces a sparse full-width row inside the grid.
+     display:grid + 0fr/1fr allocates the strip's vertical space; the height
+     ANIMATION is driven solely by .burst-strip-inner's max-height (see below)
+     so the row change here is intentionally instant — no transition. */
+  display: grid;
+  grid-template-rows: 0fr;
+}
+
+.burst-strip-wrapper.expanded {
+  grid-template-rows: 1fr;
+  /* match the contact grid's gap so the open strip sits flush below it */
+  margin-top: 5px;
+}
+
+.burst-strip-inner {
+  min-height: 0;
+  overflow: hidden;
+  /* SINGLE animated transition. Safari janks badly when grid-template-rows (fr)
+     and max-height animate in parallel — each frame triggers a double layout
+     recalculation. So the wrapper's grid-row change is instant (no transition)
+     and height alone carries the smooth open/close across all browsers. */
+  height: 0;
+  transition: none; /* instant reveal — cascade ignition IS the animation */
+}
+
+.burst-strip-wrapper.expanded .burst-strip-inner {
+  /* generous upper bound — real strip height is ~210px desktop / ~170px mobile,
+     so content is never clipped and the strip settles at its natural height */
+  height: auto;
+}
+
+/* ---- STRIP VISUAL CONTAINER ---- */
+
+.burst-strip {
+  position: relative;
+  background: #050505;
+  border-left: 2px solid var(--red);
+  overflow: hidden;
+}
+
+/* light-table warm-up flicker, scoped to the strip */
+.burst-strip::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0) 45%);
+  animation: strip-flicker 3s ease-in-out infinite;
+}
+
+@keyframes strip-flicker {
+  0%, 100% { opacity: 0.25; }
+  45% { opacity: 0.5; }
+  55% { opacity: 0.32; }
+  70% { opacity: 0.55; }
+}
+
+.strip-header {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px 6px;
+}
+
+.strip-header-label {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 2px;
+  color: var(--red);
+  opacity: 0.8;
+  text-transform: uppercase;
+  /* never wrap to a second line at narrow viewports; truncate instead */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;   /* let the flex item shrink so the ellipsis can engage */
+}
+
+.strip-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--gray-300);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1;
+  padding: 4px 6px;
+  flex-shrink: 0;     /* stay full-size and accessible next to the truncating label */
+  transition: color 0.15s ease;
+}
+
+.strip-close:hover { color: var(--red); }
+
+/* minimal dotted sprocket edges (NOT the heavy gradient rails) */
+.sprocket-edge {
+  position: relative;
+  z-index: 1;
+  height: 0;
+  margin: 0 10px;
+  border-top: 1px dotted var(--gray-700);
+}
+
+.sprocket-top { margin-bottom: 4px; }
+.sprocket-bottom { margin-top: 4px; }
+
+/* ---- STRIP SCROLL AREA ---- */
+
+.strip-scroll {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  /* explicit row flow — WebKit/Gecko otherwise let the frames stack as a
+     column in this nested grid/overflow context */
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 4px;
+  padding: 8px 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;   /* iOS scroll momentum */
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+  scrollbar-color: var(--red) #111;
+}
+
+.strip-scroll::-webkit-scrollbar { height: 6px; }
+.strip-scroll::-webkit-scrollbar-track { background: #111; }
+.strip-scroll::-webkit-scrollbar-thumb { background: var(--red); }
+
+/* ---- STRIP FRAME ---- */
+
+.strip-frame {
+  position: relative;
+  flex: 0 0 auto;
+  width: 200px;
+  height: 150px;
+  overflow: hidden;
+  cursor: pointer;
+  scroll-snap-align: start;
+  background: var(--surface);
+  opacity: 1;
+  /* Same auto-minimum guard as .burst-cell: without it the Instagram in-app
+     webview lets the image's intrinsic size override the fixed 200x150 box,
+     stretching each strip frame to full width. */
+  min-width: 0;
+  min-height: 0;
+}
+
+.strip-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.strip-frame.active {
+  outline: 1px solid var(--red);
+  outline-offset: -1px;
+}
+
+/* INVERTED tag — black on white — signals "sub-frame within a sequence" */
+.strip-frame-tag {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  z-index: 2;
+  padding: 1px 4px;
+  background: var(--white);
+  color: #000;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+  pointer-events: none;
+}
+
+/* ---- CASCADE IGNITION ---- */
+/* JS sets inline animation-delay per .strip-frame and toggles these classes.
+   `both`/`forwards` fill-modes hold the dim state during the staggered delay
+   so frames don't flash before their turn. */
+
+.strip-frame.igniting { animation: burst-ignite 200ms ease-out both; }
+.strip-frame.dimming { animation: burst-dim 200ms ease-out forwards; }
+
+@keyframes burst-ignite {
+  from { opacity: 0.15; }
+  to { opacity: 1; }
+}
+
+@keyframes burst-dim {
+  from { opacity: 1; }
+  to { opacity: 0.15; }
+}
+
+/* ---- BURST RESPONSIVE ---- */
+
+@media (max-width: 640px) {
+  .burst-cell {
+    /* lighter shadow so it doesn't crowd the tight mobile grid gaps */
+    box-shadow: 2px 2px 0 rgba(var(--accent-rgb), 0.2), 4px 4px 0 rgba(var(--accent-rgb), 0.08);
+  }
+
+  .burst-counter { top: 2px; right: 2px; padding: 1px 3px; gap: 3px; }
+  .burst-counter-text { font-size: 8px; letter-spacing: 0.5px; }
+  .burst-dot { width: 4px; height: 4px; }
+  .burst-rebate { font-size: 6.5px; bottom: 2px; left: 3px; }
+  .burst-hint { font-size: 8px; letter-spacing: 1px; }
+
+  .strip-frame { width: 150px; height: 112px; }
+  .strip-frame-tag { font-size: 8px; }
+  .strip-header-label { font-size: 0.52rem; letter-spacing: 1.5px; }
+}
+
+/* ---- BURST REDUCED MOTION ---- */
+/* Skip cascade + pulses entirely; show/hide the strip instantly. */
+
+@media (prefers-reduced-motion: reduce) {
+  .burst-strip-wrapper { transition: none; }
+  .burst-strip-inner { transition: none; }
+  .burst-dot { animation: none !important; }
+  .burst-strip::before { animation: none !important; opacity: 0.3; }
+  .strip-frame.igniting,
+  .strip-frame.dimming {
+    animation: none !important;
+    opacity: 1;
+    filter: none;
+  }
+}
+
+/* ============================================
+   BUFFER EMBED IN BLOG POSTS (Phase 2)
+   ============================================ */
+
+.buffer-embed {
+  margin-bottom: 40px;
+}
+
+.buffer-embed .day-block {
+  margin-bottom: 32px;
+}
+
+.buffer-embed .contact-grid {
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+}
+
+.buffer-view-full {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 2px;
+  color: var(--gray-700);
+  margin-top: 8px;
+  transition: color 0.2s ease;
+}
+
+.buffer-view-full:hover {
+  color: var(--red);
+}
+
+@media (max-width: 640px) {
+  .buffer-embed .contact-grid {
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  }
+}
+
+/* ============================================
+   INLINE FRAME STRIPS IN BLOG POSTS (Phase 3)
+   ============================================ */
+
+.buffer-inline-container {
+  margin: 2em 0;
+}
+
+.buffer-inline-container .contact-grid {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 130px;
+  gap: 5px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gray-800) transparent;
+  padding-bottom: 4px;
+}
+
+/* Inline strips are permanently lit */
+.buffer-inline-container.lit .emulsion {
+  background-color: #ffffff;
+}
+
+.buffer-inline-container.lit .emulsion img {
+  opacity: 0.88;
+  filter: brightness(1.1) contrast(1.15) saturate(1.1);
+}
+
+.buffer-inline-container.lit .frame:hover .emulsion img {
+  opacity: 0.92;
+  filter: brightness(1.15) contrast(1.1) saturate(1.15);
+}
+
+@media (max-width: 640px) {
+  .buffer-inline-container .contact-grid {
+    grid-auto-columns: 100px;
+  }
+}
+
+/* ============================================
+   ASSET FRAME STRIPS (from library picks)
+   Single-line horizontally-scrollable strip with
+   flanking red arrow navigation. Scoped to
+   .frame-strip so buffer-date inline strips keep
+   their own layout.
+   ============================================ */
+
+/* ---- NAV WRAPPER (‹ [strip] ›) ---- */
+
+.frame-strip-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+/* ---- ARROW BUTTONS ---- */
+
+.strip-arrow {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--red);
+  font-family: var(--font-mono);
+  font-size: 20px;
+  line-height: 1;
+  padding: 4px 2px;
+  opacity: 0.85;
+  transition: opacity 0.15s ease;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.strip-arrow:hover { opacity: 1; }
+.strip-arrow:focus-visible {
+  outline: 1px solid var(--red);
+  outline-offset: 2px;
+}
+
+/* Dim at scroll boundaries */
+.strip-arrow.at-end { opacity: 0.15; cursor: default; }
+
+/* Hide entirely when strip doesn't overflow */
+.strip-arrow.hidden { display: none; }
+
+/* ---- SCROLLABLE GRID ---- */
+
+.buffer-inline-container.frame-strip .contact-grid {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 5px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+  grid-auto-flow: unset;
+  grid-auto-columns: unset;
+  max-width: 100%;
+  padding-bottom: 2px;
+
+  /* Hide scrollbar — arrows are the navigation affordance */
+  scrollbar-width: none;
+}
+
+.buffer-inline-container.frame-strip .contact-grid::-webkit-scrollbar {
+  display: none;
+}
+
+.buffer-inline-container.frame-strip .contact-grid .frame {
+  flex: 0 0 110px;
+  min-width: 0;
+  max-width: none;
+  scroll-snap-align: start;
+}
+
+/* Keyboard focus ring on individual frames */
+.buffer-inline-container.frame-strip .contact-grid .frame:focus-visible {
+  outline: 1px solid var(--red);
+  outline-offset: -1px;
+  border-color: var(--red);
+}
+
+/* ---- MOBILE ---- */
+
+@media (max-width: 640px) {
+  .frame-strip-nav {
+    max-width: 100%;
+    gap: 4px;
+  }
+
+  .strip-arrow {
+    font-size: 16px;
+    padding: 2px 0;
+  }
+
+  .buffer-inline-container.frame-strip .contact-grid .frame {
+    flex: 0 0 85px;
+  }
+}
+
+/* ============================================================
+   EMPTY STATES — shared across every public surface
+   ============================================================
+   A fresh instance is the state every fork starts in, and the
+   state any instance returns to when its content is cleared.
+   One idiom so archive / buffer / wall / field notes all say
+   "nothing here yet" the same way, and any surface added later
+   inherits it for free.
+
+   The distinction the surfaces draw (see js/page-*.js):
+     - data file MISSING  -> sample content, so a fork that has
+       not been seeded still looks like a photography site
+     - data file EMPTY    -> this block, because content that was
+       deliberately cleared must not appear to still be there
+   ============================================================ */
+
+.page-empty {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 80px 40px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--gray-700);
+  letter-spacing: 2px;
+}
+
+.page-empty .accent { color: var(--red); }
+
+/* Second line: what to do about it. Quieter than the status line. */
+.page-empty-hint {
+  display: block;
+  margin-top: 14px;
+  font-size: 0.62rem;
+  letter-spacing: 1.5px;
+  color: var(--gray-800);
+}
+
+/* The archive and wall render their empty state inside the photo grid, so it
+   has to span every column instead of sitting in the first cell. */
+.archive-grid .page-empty,
+.wall-grid .page-empty {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 640px) {
+  .page-empty { padding: 56px 20px; letter-spacing: 1.4px; }
+}
+
+/* ============================================
+   PULSE CARD — the immediate card
+   --------------------------------------------
+   A fourth kind of grid tile, beside the photo / text / audio cards. Fed from
+   D1 through /api/pulse (never data/*.json — posting one must not cost a
+   deploy); rendered by js/recent-index.js; see docs/pulse-card-vision.md.
+
+   THE PALETTE RULE, and it is the whole reason this block looks the way it
+   does. The specimen this grew from hardcoded whole card backgrounds (#0E0B0C,
+   #111116 …), which meant a black tile sitting on a paper-white page the moment
+   anyone switched to Daylight, in any preset. So a pulse NEVER sets its own
+   background: it keeps the theme's own --surface-2 and tints it with one hue at
+   low alpha. --pulse-rgb is the only thing a palette changes, the aura and the
+   lamp are both derived from it, and everything else on the card is a theme
+   token. All five presets and both modes come out right for free.
+   ============================================ */
+
+.wk-pulse {
+  padding: 16px 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  overflow: hidden;
+  justify-content: space-between;
+  /* Default palette: the instance's own accent, so an author who never picks
+     a colour still gets a card that looks like their site. */
+  --pulse-rgb: var(--accent-rgb);
+
+  /* THE DEEP GROUND — and the reason this is two declarations rather than
+     fifty. The card wants the specimen's near-black tinted depth, but there are
+     five presets × two modes, and authoring a ground per palette per preset per
+     mode would be 60 hand-tuned colours nobody could keep in step.
+
+     So the depth is DERIVED, never enumerated: one veil darkens (or in Daylight
+     lightens) whatever surface the active theme already has, and the palette
+     lays its hue over the top. Change a preset's surface and every pulse card
+     follows; add a palette and it is one rgb triple. The hue is fixed the way
+     .wk-tag is — a safelight is red on every preset — but the GROUND under it
+     is always the theme's own.
+
+     Layer order, top to bottom: corner aura · directional hue wash · veil ·
+     the theme's surface. */
+  --pulse-veil: rgba(0, 0, 0, 0.55);
+  /* The LED's housing, on the same principle as the veil and flipped in the
+     same place (see the Daylight block below). The snippet these came from
+     hardcoded a near-black bezel and a white specular highlight, which is right
+     on a dark card and a hard black ring with a blown highlight on paper. */
+  --led-bezel: rgba(0, 0, 0, 0.9);
+  --led-spec: rgba(255, 255, 255, 0.4);
+  background:
+    radial-gradient(circle at 84% 8%, rgba(var(--pulse-rgb), 0.20) 0%, transparent 58%),
+    linear-gradient(168deg, rgba(var(--pulse-rgb), 0.11) 0%, rgba(var(--pulse-rgb), 0.03) 58%, rgba(var(--pulse-rgb), 0) 100%),
+    linear-gradient(var(--pulse-veil), var(--pulse-veil)),
+    var(--surface-2);
+  /* The edge takes the hue too, at low alpha — the specimen's tinted borders
+     (#381B1D under the red, #1F3626 under the green) without the hardcoding. */
+  border-color: rgba(var(--pulse-rgb), 0.28);
+}
+
+/* DAYLIGHT: the veil inverts rather than the card staying dark. A near-black
+   tile on a paper page is a hole punched in it, which is exactly what the
+   specimen's hardcoded grounds would have produced the moment anyone flipped
+   the toggle. Same hue, same recipe, lifted instead of deepened — so a pulse
+   still reads as itself in both modes. */
+:root[data-theme="light"] .wk-pulse {
+  --pulse-veil: rgba(255, 255, 255, 0.45);
+  /* Same reasoning one layer down: on paper the component reads as a part
+     seated in a light housing, so the bezel softens and the specular becomes a
+     shadow rather than a blown white dot. */
+  --led-bezel: rgba(0, 0, 0, 0.28);
+  --led-spec: rgba(255, 255, 255, 0.75);
+  border-color: rgba(var(--pulse-rgb), 0.34);
+}
+
+/* Six palettes. Hues are FIXED rather than theme-derived — a red safelight is
+   red on every preset, the same way .wk-tag stays light over a photograph —
+   but they are applied as a tint over the theme's surface, never as a
+   background of their own. Mid-tone values on purpose: each has to read as
+   itself on midnight ink AND on daylight paper. */
+.wk-composed[data-state]:not([data-state="default"]) {
+  --pulse-veil: rgba(0, 0, 0, 0.55);
+  background:
+    radial-gradient(circle at 84% 8%, rgba(var(--pulse-rgb, var(--accent-rgb)), 0.20) 0%, transparent 58%),
+    linear-gradient(168deg, rgba(var(--pulse-rgb, var(--accent-rgb)), 0.11) 0%, rgba(var(--pulse-rgb, var(--accent-rgb)), 0.03) 58%, rgba(var(--pulse-rgb, var(--accent-rgb)), 0) 100%),
+    linear-gradient(var(--pulse-veil), var(--pulse-veil)),
+    var(--surface-2);
+  border-color: rgba(var(--pulse-rgb, var(--accent-rgb)), 0.28);
+}
+:root[data-theme="light"] .wk-composed[data-state]:not([data-state="default"]) {
+  --pulse-veil: rgba(255, 255, 255, 0.45);
+  border-color: rgba(var(--pulse-rgb, var(--accent-rgb)), 0.34);
+}
+.wk-pulse[data-state="ember"],  .wk-composed[data-state="ember"]  { --pulse-rgb: 214, 72, 60; }
+.wk-pulse[data-state="dawn"],   .wk-composed[data-state="dawn"]   { --pulse-rgb: 198, 138, 46; }
+.wk-pulse[data-state="flow"],   .wk-composed[data-state="flow"]   { --pulse-rgb: 62, 158, 104; }
+.wk-pulse[data-state="velvet"], .wk-composed[data-state="velvet"] { --pulse-rgb: 138, 104, 214; }
+.wk-pulse[data-state="tide"],   .wk-composed[data-state="tide"]   { --pulse-rgb: 58, 134, 176; }
+.wk-composed[data-state="signal"] { --pulse-rgb: var(--accent-rgb); }
+.wk-composed[data-state]:not([data-state="default"]) .wk-dot {
+  background: rgb(var(--pulse-rgb));
+  box-shadow:
+    inset 0 0 2px var(--led-spec, rgba(255, 255, 255, 0.55)),
+    0 0 6px rgba(var(--pulse-rgb), 0.55);
+}
+
+/* ⚠️ NOT on an overlay card. A palette tints a card's GROUND, and an overlay
+   card has none — the 4:5 picture IS the whole card, and the body is a band on
+   top of it. Washing that band in the palette hue would fight the treatment
+   underneath it and the derived ink over it, both of which exist to guarantee
+   one thing this gradient knows nothing about: that the words can be read. The
+   tinted border still carries the palette. */
+.wk-composed[data-shape="picture"][data-state]:not([data-state="default"]):not([data-layout="overlay"]) .wk-body {
+  background: linear-gradient(180deg, rgba(var(--pulse-rgb, var(--accent-rgb)), 0.12) 0%, rgba(var(--pulse-rgb, var(--accent-rgb)), 0.04) 100%);
+}
+.wk-composed[data-shape="picture"][data-state]:not([data-state="default"]) {
+  border-color: rgba(var(--pulse-rgb, var(--accent-rgb)), 0.35);
+}
+
+/* The aura moved INTO the background stack above (it is the top layer there),
+   so the old ::before that drew it separately is gone — two radials at the same
+   corner just muddied each other. The stacking rule stays: content sits above
+   the painted ground. */
+.wk-pulse > *,
+.wk-composed[data-state] > * { position: relative; z-index: 1; }
+
+/* ---- kicker row: the lamp, the label, the frozen clock ---- */
+.wk-p-kicker {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-family: var(--font-meta);
+  font-size: 0.56rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgb(var(--pulse-rgb));
+}
+.wk-p-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* ---- the LED: an SMD component, not a dot ----
+   Square with a 1px corner, a dark bezel and an inset specular — a surface-mount
+   part seated on a board, which is the register the whole console already works
+   in (the SYS lamp says the same thing in css/field-console.css). It replaced a
+   plain round dot on 2026-08-13.
+
+   Everything derives from --pulse-rgb and the two housing tokens above, so all
+   six palettes and both themes come out right from this one declaration. Nothing
+   here is a hex value; that is the rule the rest of this block lives by. */
+.wk-p-led {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 auto;
+  border-radius: 1px;
+  background: rgb(var(--pulse-rgb));
+  border: 1px solid var(--led-bezel);
+  box-shadow:
+    inset 0 0 2px var(--led-spec),
+    0 0 8px rgba(var(--pulse-rgb), 0.55);
+  animation: wk-p-led 2s steps(1, end) infinite;
+}
+/* The one piece of motion on the card, and it earns its place: it is the only
+   thing that says "this is live right now" rather than "this was posted". A
+   data-read stutter rather than a smooth breathe — two quick beats and a long
+   dark rest, the way an activity light actually behaves.
+
+   Note what the trough does NOT do: kill the whole box-shadow. The snippet this
+   came from set `box-shadow: none` at rest, which drops the inset highlight with
+   the glow and makes the component flatten to a painted square between beats.
+   Only the OUTER glow goes; the part keeps its shape.
+
+   The floating-glyph bob from the specimen is still deliberately NOT here — a
+   permanently running transform on a homepage tile is a battery cost for
+   decoration. Opacity and box-shadow are compositor-cheap; a transform is not. */
+@keyframes wk-p-led {
+  0%, 10%, 20%, 100% {
+    opacity: 0.25;
+    box-shadow: inset 0 0 2px var(--led-spec);
+  }
+  5%, 15% {
+    opacity: 1;
+    box-shadow:
+      inset 0 0 2px var(--led-spec),
+      0 0 12px rgba(var(--pulse-rgb), 0.7);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wk-p-led { animation: none; opacity: 0.9; }
+}
+/* The author's wall clock at the moment of posting, frozen at write time —
+   never the visitor's. Tabular so it does not jitter between cards. */
+.wk-p-time {
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+  flex: 0 0 auto;
+}
+
+/* ---- the body: glyph over line, centred in the leftover space ---- */
+.wk-p-center {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1 1 auto;
+  gap: 10px;
+  min-height: 0;
+}
+.wk-p-glyph {
+  line-height: 1;
+  font-size: 2.6rem;
+  filter: drop-shadow(0 5px 14px rgba(0, 0, 0, 0.28));
+}
+.wk-p-text {
+  font-family: var(--font-body);
+  font-size: 1.35rem;
+  line-height: 1.32;
+  letter-spacing: -0.005em;
+  color: var(--fg);
+}
+
+/* Adaptive tiers — the SAME three the field-note text cards use (statement /
+   feature / standard), stamped by js/recent-index.js from the line's length.
+   One ladder, one vocabulary, both card types: a pulse-only ladder would have
+   been a second system to keep in sync on a single grid. The glyph scales with
+   the tier instead of having a ladder of its own. */
+.wk-pulse[data-tier="statement"] .wk-p-text {
+  font-family: var(--font-display);
+  font-weight: 560;
+  font-size: clamp(1.6rem, 1.05rem + 1.9vw, 2.3rem);
+  line-height: 1.14;
+  letter-spacing: -0.02em;
+  color: var(--fg-strong);
+}
+.wk-pulse[data-tier="statement"] .wk-p-glyph { font-size: 3.4rem; }
+.wk-pulse[data-tier="feature"] .wk-p-text { font-size: 1.5rem; line-height: 1.28; }
+.wk-pulse[data-tier="feature"] .wk-p-glyph { font-size: 2.4rem; }
+.wk-pulse[data-tier="standard"] .wk-p-glyph { font-size: 1.7rem; }
+
+/* A glyph-only pulse (no words at all) is a legitimate post — give it the room
+   the missing line would have taken rather than stranding it at the top. */
+.wk-pulse[data-tier="glyph"] .wk-p-glyph {
+  font-size: clamp(3.6rem, 2.2rem + 5vw, 5.4rem);
+  text-align: center;
+}
+
+/* ---- footer: two free-text cells, both empty by default ----
+   Deliberately NOT a gear/camera/take-number field. Named slots for one
+   discipline's metadata would quietly tell writers, musicians, filmmakers and
+   podcasters that this card is not for them. The author types whatever they
+   like, or nothing — and with nothing, the row does not render at all. */
+.wk-p-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 4px;
+  padding-top: 9px;
+  border-top: 1px solid var(--line);
+  font-family: var(--font-meta);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.wk-p-foot-left { color: rgb(var(--pulse-rgb)); }
+.wk-p-foot span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The pulse tile is not a link — it goes nowhere. So it must not claim to:
+   no pointer cursor, and hovering must not light the edge the way it does on a
+   card you can open. It holds its palette's own border instead of falling back
+   to --line, which would have flashed the hue off on hover now that the edge
+   carries the colour. */
+.wk-card.wk-pulse { cursor: default; }
+@media (hover: hover) {
+  .wk-card.wk-pulse:hover { border-color: rgba(var(--pulse-rgb), 0.28); }
+  :root[data-theme="light"] .wk-card.wk-pulse:hover { border-color: rgba(var(--pulse-rgb), 0.34); }
+}

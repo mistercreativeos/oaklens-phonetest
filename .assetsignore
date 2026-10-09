@@ -1,0 +1,92 @@
+.git
+.wrangler
+node_modules
+.dev.vars*
+wrangler.jsonc
+worker.js
+# Imported into worker.js at build (identity is injected into pages at the edge),
+# so the raw file must never be fetchable — it carries contact/coords and, in
+# comments, pre-launch repo names (the `oaklens-os` sameAs line).
+site.config.js
+site.config.example.js
+.aider*
+# npm's scratch dir — `_logs/` in particular. A debug log records the absolute
+# path npm ran from, so it carries somebody's home directory verbatim. One was
+# committed on 2026-09-11 and served from here until 2026-09-16; `.gitignore`
+# now stops it being committed, and this stops it being SERVED if it ever is
+# again. Two doors, because the tracked copy got past the first one once.
+.npm
+
+# AI-agent scratch space. `.claude/worktrees/` holds whole CHECKOUTS of this repo
+# (a second copy of every page, and of site.config.js with it), and a fork that
+# commits its `.claude/` settings would otherwise serve them: the assets dir is
+# the repo root and serves by default.
+.claude
+audit/
+.DS_Store
+
+# Server source is bundled into worker.js at deploy time — never serve it raw.
+src
+scripts
+# SQL schemas / one-off migration artifacts that may land in the repo root.
+*.sql
+# D1 wrangler migrations (console tables) — applied by setup.sh / the deploy
+# script, never served.
+migrations
+# Local build/patch helpers (e.g. patch_html.py) — dev tooling, never web assets.
+# The assets dir is the repo root and serves by default, so a loose script in
+# the root would otherwise be publicly fetchable.
+*.py
+*.sh
+bench.json
+bench-remote.json
+# Git housekeeping files. They carry nothing secret, but they were being
+# uploaded and served as web assets — `/.gitignore` and `/archive/.gitkeep`
+# were in the deploy list of a real fork. Placeholders for empty directories
+# are not part of anybody's site.
+.gitignore
+.gitkeep
+
+# Project metadata, not web assets. README + docs describe repo internals
+# (including pre-launch repo names) and must not be fetchable on the site.
+package.json
+package-lock.json
+setup.md
+quickstart.md
+README.md
+LICENSE
+CONTRIBUTING.md
+SECURITY.md
+CODE_OF_CONDUCT.md
+CHANGELOG.md
+CUSTOMIZE.md
+# The owner's own log of changes that differ from the engine (CUSTOMIZE.md).
+# The engine never ships it; ignored here so a fork's copy is never served.
+MY-CHANGES.md
+# AI-agent working agreement — repo-only (visible on GitHub, never a web asset).
+CLAUDE.md
+AGENTS.md
+# Open-source template/example config — never served on a live instance.
+*.example.jsonc
+docs
+# Internal engineering docs under /dev/ (manual, architecture, audit rules,
+# UX spec) — repo-only reading. posts/*.md stays served (post.html fetches it).
+dev/*.md
+# Analysis output under /dev/ (e.g. console-callgraph.json) — internal structure,
+# never a web asset. dev/manifest.webmanifest is a different extension and still
+# serves; nothing under dev/ fetches a .json.
+dev/*.json
+# Design prototypes under /dev/ — repo-only, never a web asset. The console
+# and the two project pages are the only HTML down here that is meant to be
+# reachable; a mockup is a thing you open locally while deciding something.
+# A lighting mockup sat here untracked on 2026-09-20, and committed it would
+# have been a live page at /dev/lighting-mockup.html — HUD sliders, debug
+# controls and all — because the assets dir is the repo root and serves by
+# default. Glob, not a filename: the next prototype will have another name.
+dev/*-mockup.html
+dev/*-prototype.html
+# Tooling / build output / CI — never served.
+tests
+vitest.config.js
+dist
+.github
